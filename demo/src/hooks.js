@@ -1,5 +1,5 @@
 import { useMediaCapture } from 'react-media-capture';
-import { useSequentialState } from 'react';
+import { useSequentialState } from 'react-seq';
 
 export function useBarcodeDetection(options = {}) {
   const {
@@ -54,6 +54,7 @@ export function useBarcodeDetection(options = {}) {
     } else if (status === 'previewing') {
       status = 'scanning';
     }
+    console.log(status);
     initial(currentState());
     if (status !== 'scanning') {
       return;
@@ -72,6 +73,7 @@ export function useBarcodeDetection(options = {}) {
       const detector = new window.BarcodeDetector({ formats });
       for (;;) {
         barcodes = await detector.detect(video);
+        console.log(barcodes);
         yield currentState();
         const pause = (barcodes.length > 0) ? scanIntervalPositive : scanInterval;
         await eventual.dismount.for(pause).milliseconds;
@@ -79,6 +81,7 @@ export function useBarcodeDetection(options = {}) {
     } catch (err) {
       status = 'denied';
       lastError = err;
+      console.error(err);
       yield currentState();
     }
   }, [ state, accept, scanInterval, scanIntervalPositive ]);

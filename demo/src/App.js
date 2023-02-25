@@ -4,8 +4,9 @@ import { StreamVideo } from 'react-media-capture';
 
 export default function App() {
   const { 
-    liveVideo: { stream, width, height },
+    liveVideo,
   } = useBarcodeDetection();
+  const { stream, width, height } = liveVideo ?? {};
   return (
     <div>
       <StreamVideo srcObject={stream} width={width} height={height} />
