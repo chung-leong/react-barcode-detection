@@ -1,15 +1,20 @@
 import './css/App.css';
-import { useBarcodeDetection } from './hooks';
+import { useBarcodeDetection } from './hooks.js';
 import { StreamVideo } from 'react-media-capture';
+import { BarcodeOverlay } from './components.js';
 
 export default function App() {
   const { 
     liveVideo,
+    barcodes,
   } = useBarcodeDetection();
-  const { stream, width, height } = liveVideo ?? {};
+  const { stream: srcObject, width, height } = liveVideo ?? {};
+  const cornerPoints = { fill: 'rgba(255, 0, 0, 0.5)' };  
   return (
-    <div>
-      <StreamVideo srcObject={stream} width={width} height={height} />
+    <div className="App">
+      <StreamVideo {...{ srcObject, width, height }} />
+      <BarcodeOverlay {...{ barcodes, width, height, cornerPoints } } />
     </div>
   );
 }
+

@@ -5,9 +5,10 @@ export function useBarcodeDetection(options = {}) {
   const {
     preferredDevice = 'back',
     selectNewDevice = true,
-    accept = 'qr_code',
+    accept = 'qr_code,upc_a,ean_13',
     scanInterval = 250,
     scanIntervalPositive = 50,
+    clearInterval = 250,
   } = options;
   const state = useMediaCapture({
     video: true,
@@ -15,6 +16,7 @@ export function useBarcodeDetection(options = {}) {
     active: typeof(BarcodeDetector) === 'function',
     preferredDevice, 
     selectNewDevice,
+    watchVolume: false,
   });
   return useSequentialState(async function*({ initial, manageEvents }) {
     const formats = accept.trim().split(/\s*,\s*/);
@@ -54,7 +56,6 @@ export function useBarcodeDetection(options = {}) {
     } else if (status === 'previewing') {
       status = 'scanning';
     }
-    console.log(status);
     initial(currentState());
     if (status !== 'scanning') {
       return;
@@ -67,21 +68,31 @@ export function useBarcodeDetection(options = {}) {
       video.muted = true;
       video.oncanplay = on.videoReadiness;
       video.onerror = on.videoReadiness.throw;
+      video.play();
       await eventual.videoReadiness;
-
+    
       // look for barcodes continually
       const detector = new window.BarcodeDetector({ formats });
+      let clearAllowance = 0;
       for (;;) {
-        barcodes = await detector.detect(video);
-        console.log(barcodes);
-        yield currentState();
-        const pause = (barcodes.length > 0) ? scanIntervalPositive : scanInterval;
-        await eventual.dismount.for(pause).milliseconds;
+        const newBarcodes = await detector.detect(video);
+        if (newBarcodes.length > 0) {
+          barcodes = newBarcodes;
+          yield currentState();
+          clearAllowance = clearInterval;
+        } else if (barcodes.length > 0) {
+          clearAllowance -= scanInterval;
+          if (clearAllowance <= 0) {
+            barcodes = newBarcodes;
+            yield currentState();  
+          }
+        }
+        const interval = (barcodes.length > 0) ? scanIntervalPositive : scanInterval;
+        await eventual.dismount.for(interval).milliseconds;
       }
     } catch (err) {
       status = 'denied';
       lastError = err;
-      console.error(err);
       yield currentState();
     }
   }, [ state, accept, scanInterval, scanIntervalPositive ]);
