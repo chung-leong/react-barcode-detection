@@ -1,6 +1,81 @@
 import { useEffect, useRef } from 'react';
+import { useBarcodeDetection } from './hooks.js';
+import { StreamVideo } from 'react-media-capture';
 
-export function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoints }) {
+const defCP = { 
+  stroke: 'rgba(0, 255, 0, 0.8)',
+  lineWidth: 3,
+};  
+
+export function BarcodeScanner(props) {
+  const { 
+    boundingBox, 
+    cornerPoints = defCP, 
+    children,
+    delay = 0, 
+    onData, 
+    onBarcodes, 
+    ...options 
+  } = props;
+  if (delay > 0) {
+    options.clearInterval = Infinity;
+  }
+  const { 
+    status,
+    liveVideo,
+    barcodes,
+  } = useBarcodeDetection(options);
+  let content, overlay
+  if (liveVideo) {
+    const { stream: srcObject, width, height } = liveVideo;
+    const style = { 
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      width: '100%',
+      height: '100%', 
+      objectFit: 'contain',
+    };
+      content = <StreamVideo {...{ srcObject, style }} />;
+    if (cornerPoints || boundingBox) {
+      overlay = <BarcodeOverlay {...{ barcodes, width, height, boundingBox, cornerPoints, style }} />
+    }
+  } else {
+    content = children;
+  }
+  const classList = [ 'BarcodeScanner', status ];
+  if (barcodes.length > 0) {
+    classList.push('found');
+  }
+  const previous = useRef({ string: '[]', timer: 0 });
+  useEffect(() => {
+    const list = barcodes.map(({ format, rawValue }) => { return { format, rawValue } });
+    const string = JSON.stringify(list);
+    if (string !== previous.current.string) {
+      previous.current.string = string;
+      const notify = () => {
+        onBarcodes?.(list);
+        onData?.(list[0]?.rawValue);
+      };
+      if (delay > 0) {
+        // call handler only once
+        if (!previous.current.timer) {
+          previous.current.timer = setTimeout(notify, delay); 
+        }
+      } else {
+        notify();
+      }
+    }
+  }, [ barcodes, onData, onBarcodes, delay ]);
+  return (
+    <div className={classList.join(' ')} style={{ position: 'relative' }}>
+      {content}
+      {overlay}
+    </div>
+  );
+}
+
+export function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoints, style }) {
   const { 
     fill: bbFill, 
     stroke: bbStroke, 
@@ -57,6 +132,6 @@ export function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoi
         }
       }
     }
-  }, [ barcodes, width, height, bbFill, cpFill, bbStroke, cpStroke, bbRadii ]);
-  return <canvas {...{ ref, width, height }} />;
+  }, [ barcodes, width, height, bbFill, bbStroke, bbLineWidth, bbRadii, cpFill, cpStroke, cpLineWidth ]);
+  return <canvas {...{ ref, width, height, style }} />;
 }

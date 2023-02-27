@@ -3,6 +3,7 @@ import { useSequentialState } from 'react-seq';
 
 export function useBarcodeDetection(options = {}) {
   const {
+    active = true,
     preferredDevice = 'back',
     selectNewDevice = true,
     accept = 'qr_code,upc_a,ean_13',
@@ -13,7 +14,7 @@ export function useBarcodeDetection(options = {}) {
   const state = useMediaCapture({
     video: true,
     audio: false,
-    active: typeof(BarcodeDetector) === 'function',
+    active: active && typeof(BarcodeDetector) === 'function',
     preferredDevice, 
     selectNewDevice,
     watchVolume: false,
@@ -95,5 +96,5 @@ export function useBarcodeDetection(options = {}) {
       lastError = err;
       yield currentState();
     }
-  }, [ state, accept, scanInterval, scanIntervalPositive ]);
+  }, [ state, accept, scanInterval, scanIntervalPositive, clearInterval ]);
 }
