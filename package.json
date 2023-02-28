@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/chung-leong/react-barcode-detection#readme",
   "dependencies": {
-    "react-media-capture": "^0.0.3"
+    "react-media-capture": "^0.0.5"
   },
   "devDependencies": {
     "abort-controller": "^3.0.0",

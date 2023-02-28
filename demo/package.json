@@ -9,7 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-media-capture": "^0.0.4",
+    "react-media-capture": "^0.0.5",
     "react-scripts": "5.0.1",
     "react-seq": "^0.9.0",
     "source-map-explorer": "^2.5.3",
@@ -17,7 +17,7 @@
   },
   "scripts": {
     "analyze": "source-map-explorer --gzip 'build/static/js/*.js'",
-    "start": "HTTPS=true react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
