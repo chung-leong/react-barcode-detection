@@ -1,6 +1,11 @@
 export {
+  BarcodeScanner,
+  BarcodeOverlay,
+} from './src/components.js';
+export {
   useBarcodeDetection,
 } from './src/hooks.js';
 export {
-  StreamVideo
+  StreamVideo,
+  BlobImage,
 } from 'react-media-capture';

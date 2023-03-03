@@ -1,6 +1,6 @@
 {
   "name": "react-barcode-detection",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Barcode detection",
   "main": "index.js",
   "type": "module",
@@ -16,7 +16,17 @@
   },
   "keywords": [
     "barcode",
-    "qrcode"
+    "qr",
+    "qr-code",
+    "aztec",
+    "data-matrix",
+    "pdf417",
+    "upc",
+    "ean"
+  ],
+  "files": [
+    "src/",
+    "index.js"
   ],
   "author": "Chung Leong",
   "license": "MIT",
@@ -25,7 +35,7 @@
   },
   "homepage": "https://github.com/chung-leong/react-barcode-detection#readme",
   "dependencies": {
-    "react-media-capture": "^0.0.5"
+    "react-media-capture": "^0.0.6"
   },
   "devDependencies": {
     "abort-controller": "^3.0.0",
