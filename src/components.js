@@ -128,5 +128,5 @@ export function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoi
       }
     }
   }, [ barcodes, width, height, bbFill, bbStroke, bbLineWidth, bbRadii, cpFill, cpStroke, cpLineWidth ]);
-  return createElement(canvas, { ref, width, height, style });
+  return createElement('canvas', { ref, width, height, style });
 }
