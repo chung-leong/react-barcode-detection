@@ -1,23 +1,28 @@
 import Quirc from './wasm/quirc.js';
 
 let wasm;
+let prepared = false;
 
 const methods = {
-  async initialize(width, height) {
-    const res = await fetch(new URL('./wasm/quirc.wasm', import.meta.url));
-    const wasmBinary = await res.arrayBuffer();
-    wasm = await Quirc({ wasmBinary });
-    const { _prepare } = wasm;
-    if (!_prepare(width, height)) {
-      throw new Error('Unable to allocate memory');
-    }
-  },
   async detect({ data, width, height }) {
+    if (!wasm) {
+      const res = await fetch(new URL('./wasm/quirc.wasm', import.meta.url));
+      const wasmBinary = await res.arrayBuffer();
+      wasm = await Quirc({ wasmBinary });
+    }
+    if (!prepared) {
+      const { _prepare } = wasm;
+      if (!_prepare(width, height)) {
+        throw new Error('Unable to allocate memory');
+      }  
+      prepared = true;
+    }
+
     // get pointer from WASM
     const { _begin, _end, _count, _get, _get_length, _get_type, _get_corners, HEAP8 } = wasm;
     const bufPtr = _begin();
     const heap = HEAP8.buffer;
-    const buffer = new Uint8ClampedArray(heap, bufPtr, width * height);
+    const buffer = new Uint8Array(heap, bufPtr, width * height);
     // convert image data to greyscale 
     for (let i = 0, j = 0; i < width * height; i++, j += 4) {
       const r = data[j + 0];
@@ -29,17 +34,25 @@ const methods = {
     // scan it
     _end();
     const count = _count();
-    if (count > 0) {
-      console.log({ count });
-    }
     const barcodes = [];
     for (let i = 0; i < count; i++) {
-      debugger;
-      const rawPtr = _get(i);
-      if (rawPtr) {
+      const bytePtr = _get(i);
+      if (bytePtr) {
+        // convert bytes into a string
         const length = _get_length();
-        const raw = new Uint8Array(heap, rawPtr, length);
+        const bytes = new Uint8Array(heap, rawPtr, length);
         const type = _get_type();
+        let rawValue;
+        try {
+          if (type === 8) { // kanji
+            rawValue = decode(bytes, 'shift-jis');
+          } else {
+            rawValue = decode(bytes, 'utf-8');
+          }
+        } catch (err) {
+          rawValue = decode(bytes, 'iso-8859-1');
+        }
+        // extract corners
         const cornerPtr = _get_corners();
         const coords = new Int32Array(heap, cornerPtr, 8);
         const cornerPoints = [];
@@ -60,6 +73,11 @@ const methods = {
     return barcodes;
   }   
 };
+
+function decode(bytes, encoding) {
+  const decoder = new TextDecoder(encoding);
+  return decoder.decode(bytes);
+}
 
 onmessage = async function({ data: { name, args} }) {
   try {

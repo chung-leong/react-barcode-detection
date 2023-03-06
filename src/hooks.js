@@ -126,7 +126,6 @@ async function *generate(method, formats, video, on, eventual) {
     };
     try {
       const { videoWidth, videoHeight } = video;
-      await call('initialize', [ videoWidth, videoHeight ]);
       const canvas = document.createElement('CANVAS');
       canvas.width = videoWidth;
       canvas.height = videoHeight;

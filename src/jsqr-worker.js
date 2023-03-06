@@ -1,8 +1,6 @@
 import jsQR from 'jsqr';
 
 const methods = {
-  async initialize(width, height) {
-  },
   async detect({ data, width, height }) {
     const code = jsQR(data, width, height, { inversionAttempts: 'attemptBoth' });
     const barcodes = [];
