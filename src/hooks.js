@@ -2,16 +2,18 @@ import { useMediaCapture } from 'react-media-capture';
 import { useSequentialState } from 'react-seq';
 
 export function useBarcodeDetection(options = {}) {
+  const isMobileDevice = /Mobi/i.test(window.navigator.userAgent);
   const {
     active = true,
     preferredDevice = 'back',
     selectNewDevice = true,
     accept = 'qr_code',
+    use = isMobileDevice ? 'api,wasm,js' : 'api,js',
     scanInterval = 250,
     scanIntervalPositive = 50,
     clearInterval = 250,
-    method = getDefaultMethod(),
   } = options;
+  const method = selectMethod(use);
   const supported = hasSupport(method, accept);
   const state = useMediaCapture({
     video: true,
@@ -22,7 +24,7 @@ export function useBarcodeDetection(options = {}) {
     watchVolume: false,
   });
   return useSequentialState(async function*({ initial, manageEvents }) {
-    const formats = accept.trim().split(/\s*,\s*/);
+    const formats = split(accept);
     const {
       liveVideo,
       devices,
@@ -74,9 +76,53 @@ export function useBarcodeDetection(options = {}) {
       video.play();
       await eventual.videoReadiness;
     
+      // create generator
+      const generator = (async function *() {
+        if (method === 'api') {
+          const detector = new window.BarcodeDetector({ formats });
+          for (;;) {
+            yield detector.detect(video);
+          }
+        } else if (method === 'wasm' || method === 'js') {
+          // need to pass static string to URL in order for Webpack to pick it up
+          let worker;
+          if (method === 'wasm') {
+            worker = new Worker(new URL('./quirc-worker.js', import.meta.url));
+          } else {
+            worker = new Worker(new URL('./jsqr-worker.js', import.meta.url));
+          }
+          // our "poor-man's comlink", as that lib doesn't work well with CRA
+          const call = async (name, args, transfer) => {
+            worker.postMessage({ name, args }, transfer);
+            worker.addEventListener('message', on.message, { once: true });
+            const { message: { data } } = await eventual.message;
+            if (data.type === 'error') {
+              throw new Error(data.message);
+            } else {
+              return data.result;
+            }
+          };
+          try {
+            const { videoWidth, videoHeight } = video;
+            const canvas = document.createElement('CANVAS');
+            canvas.width = videoWidth;
+            canvas.height = videoHeight;
+            const context = canvas.getContext('2d', { willReadFrequently: true });
+            for (;;) {
+              // draw into canvas and obtain image data
+              context.drawImage(video, 0, 0, videoWidth, videoHeight);
+              const image = context.getImageData(0, 0, videoWidth, videoHeight);
+              // transfer image data to worker
+              yield call('detect', [ image ], [ image.data.buffer ]);        
+            }  
+          } finally {
+            worker.terminate();
+          }
+        }
+      })();
       // look for barcodes continually
       let clearAllowance = 0;
-      for await (const newBarcodes of generate(method, formats, video, on, eventual)) {
+      for await (const newBarcodes of generator) {
         if (newBarcodes.length > 0) {
           barcodes = newBarcodes;
           yield currentState();
@@ -99,62 +145,29 @@ export function useBarcodeDetection(options = {}) {
   }, [ state, method, supported, accept, scanInterval, scanIntervalPositive, clearInterval ]);
 }
 
-async function *generate(method, formats, video, on, eventual) {
-  if (method === 'api') {
-    const detector = new window.BarcodeDetector({ formats });
-    for (;;) {
-      yield detector.detect(video);
-    }
-  } else if (method === 'wasm' || method === 'js') {
-    // need to pass static string to URL in order for Webpack to pick it up
-    let worker;
-    if (method === 'wasm') {
-      worker = new Worker(new URL('./quirc-worker.js', import.meta.url));
-    } else {
-      worker = new Worker(new URL('./jsqr-worker.js', import.meta.url));
-    }
-    // our "poor-man's comlink", as that lib doesn't work well with CRA
-    const call = async (name, args, transfer) => {
-      worker.postMessage({ name, args }, transfer);
-      worker.addEventListener('message', on.message, { once: true });
-      const { message: { data } } = await eventual.message;
-      if (data.type === 'error') {
-        throw new Error(data.message);
-      } else {
-        return data.result;
+function selectMethod(use) {
+  const methods = split(use);
+  for (const method of method) {
+    if (method === 'api') {
+      if (typeof(BarcodeDetector) === 'function') {
+        return method;
       }
-    };
-    try {
-      const { videoWidth, videoHeight } = video;
-      const canvas = document.createElement('CANVAS');
-      canvas.width = videoWidth;
-      canvas.height = videoHeight;
-      const context = canvas.getContext('2d', { willReadFrequently: true });
-      for (;;) {
-        // draw into canvas and obtain image data
-        context.drawImage(video, 0, 0, videoWidth, videoHeight);
-        const image = context.getImageData(0, 0, videoWidth, videoHeight);
-        // transfer image data to worker
-        yield call('detect', [ image ], [ image.data.buffer ]);        
-      }  
-    } finally {
-      worker.terminate();
+    } else if (method === 'wasm') {
+      if (typeof(WebAssembly) === 'object') {
+        return method;
+      }
+    } else if (method === 'js') {
+      return method;
+    } else {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Unknown method: ${method}`);
+      }
     }
-  }
-}
-
-function getDefaultMethod() {
-  if (typeof(BarcodeDetector) === 'function') {
-    return 'api';
-  } else if (typeof(WebAssembly) === 'object') {
-    return 'wasm';
-  } else {
-    return 'js';
   }
 }
 
 function hasSupport(method, accept) {
-  const formats = accept.trim().split(/\s*,\s*/);
+  const formats = split(accept);
   const available = getSupportedFormats(method);
   const missing = formats.filter(f => !available.includes(f));
   if (missing.length === 0) {
@@ -185,10 +198,12 @@ function getSupportedFormats(method) {
       'upc_e'
     ];
   } else if (method === 'wasm' || method === 'js') {
-    return [ 
-      'qr_code' 
-    ];
+    return [ 'qr_code' ];
   } else {
-    throw new Error(`Unknown method: ${method}`);
+    return [];
   }
+}
+
+function split(s) {
+  return s.trim().split(/\s*,\s*/);
 }
