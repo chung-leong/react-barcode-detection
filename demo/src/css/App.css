@@ -6,6 +6,7 @@ body {
 	font-family: sans-serif;
   margin: 0;
   background-color: #000;
+  color: #fff;
   overflow: hidden;
 }
 
@@ -15,7 +16,7 @@ body {
 
 .App .data {
   position: absolute;
-  bottom: 1em;
+  top: 8em;
   left: 0;
   right: 0;
   margin: auto;

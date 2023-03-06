@@ -27,7 +27,7 @@ Module['ready'] = new Promise(function(resolve, reject) {
   readyPromiseResolve = resolve;
   readyPromiseReject = reject;
 });
-["_main","_prepare","_begin","_end","_get_count","_get","_get_length","_get_type","_fflush","onRuntimeInitialized"].forEach((prop) => {
+["_main","_prepare","_begin","_end","_count","_get","_get_corners","_get_length","_get_type","_fflush","onRuntimeInitialized"].forEach((prop) => {
   if (!Object.getOwnPropertyDescriptor(Module['ready'], prop)) {
     Object.defineProperty(Module['ready'], prop, {
       get: () => abort('You are getting ' + prop + ' on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js'),
@@ -1229,9 +1229,11 @@ var _begin = Module["_begin"] = createExportWrapper("begin");
 /** @type {function(...*):?} */
 var _end = Module["_end"] = createExportWrapper("end");
 /** @type {function(...*):?} */
-var _get_count = Module["_get_count"] = createExportWrapper("get_count");
+var _count = Module["_count"] = createExportWrapper("count");
 /** @type {function(...*):?} */
 var _get = Module["_get"] = createExportWrapper("get");
+/** @type {function(...*):?} */
+var _get_corners = Module["_get_corners"] = createExportWrapper("get_corners");
 /** @type {function(...*):?} */
 var _get_length = Module["_get_length"] = createExportWrapper("get_length");
 /** @type {function(...*):?} */

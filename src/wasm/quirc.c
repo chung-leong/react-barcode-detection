@@ -25,7 +25,7 @@ void EMSCRIPTEN_KEEPALIVE end() {
   return quirc_end(ctx);
 }
 
-int32_t EMSCRIPTEN_KEEPALIVE get_count() {
+int32_t EMSCRIPTEN_KEEPALIVE count() {
   return quirc_count(ctx);
 }
 
@@ -33,6 +33,10 @@ uint8_t * EMSCRIPTEN_KEEPALIVE get(int32_t index) {
   quirc_extract(ctx, index, code);
   quirc_decode_error_t result = quirc_decode(code, data);
   return (result == QUIRC_SUCCESS) ? data->payload : NULL;
+}
+
+int32_t * EMSCRIPTEN_KEEPALIVE get_corners() {
+  return (int32_t *) &code->corners[0].x;
 }
 
 int32_t EMSCRIPTEN_KEEPALIVE get_length() {

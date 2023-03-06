@@ -24,6 +24,7 @@ export function BarcodeScanner(props) {
     status,
     liveVideo,
     barcodes,
+    lastError,
   } = useBarcodeDetection(options);
   let content, overlay
   if (liveVideo) {
@@ -67,6 +68,9 @@ export function BarcodeScanner(props) {
       }
     }
   }, [ barcodes, onData, onBarcodes, delay ]);
+  if (lastError) {
+    return createElement('div', {}, lastError.message);
+  }
   return createElement('div', { className: classList.join(' '), style: { position: 'relative' } }, content, overlay);
 }
 

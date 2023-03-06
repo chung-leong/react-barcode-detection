@@ -27,6 +27,9 @@
       "react-app",
       "react-app/jest",
       "react-seq"
+    ],
+    "ignorePatterns": [
+      "**/wasm/*.js"
     ]
   },
   "browserslist": {

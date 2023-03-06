@@ -26,7 +26,9 @@
     "ean"
   ],
   "files": [
-    "src/",
+    "src/*.js",
+    "src/wasm/*.js",
+    "src/wasm/*.wasm",
     "index.js"
   ],
   "author": "Chung Leong",
@@ -36,7 +38,8 @@
   },
   "homepage": "https://github.com/chung-leong/react-barcode-detection#readme",
   "dependencies": {
-    "react-media-capture": "^0.0.6"
+    "jsqr": "^1.4.0",
+    "react-media-capture": "^0.0.7"
   },
   "peer-dependencies": {
     "react-seq": "^0.9.0"
