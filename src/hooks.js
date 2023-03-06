@@ -8,7 +8,7 @@ export function useBarcodeDetection(options = {}) {
     preferredDevice = 'back',
     selectNewDevice = true,
     accept = 'qr_code',
-    use = isMobileDevice ? 'api,wasm,js' : 'api,js',
+    use = isMobileDevice ? 'api,quirc,jsqr' : 'api,jsqr',
     scanInterval = 250,
     scanIntervalPositive = 50,
     clearInterval = 250,
@@ -83,10 +83,10 @@ export function useBarcodeDetection(options = {}) {
           for (;;) {
             yield detector.detect(video);
           }
-        } else if (method === 'wasm' || method === 'js') {
+        } else if (method === 'quirc' || method === 'jsqr') {
           // need to pass static string to URL in order for Webpack to pick it up
           let worker;
-          if (method === 'wasm') {
+          if (method === 'quirc') {
             worker = new Worker(new URL('./quirc-worker.js', import.meta.url));
           } else {
             worker = new Worker(new URL('./jsqr-worker.js', import.meta.url));
@@ -146,17 +146,16 @@ export function useBarcodeDetection(options = {}) {
 }
 
 function selectMethod(use) {
-  const methods = split(use);
-  for (const method of method) {
+  for (const method of split(use)) {
     if (method === 'api') {
       if (typeof(BarcodeDetector) === 'function') {
         return method;
       }
-    } else if (method === 'wasm') {
+    } else if (method === 'quirc') {
       if (typeof(WebAssembly) === 'object') {
         return method;
       }
-    } else if (method === 'js') {
+    } else if (method === 'jsqr') {
       return method;
     } else {
       if (process.env.NODE_ENV === 'development') {
@@ -197,7 +196,7 @@ function getSupportedFormats(method) {
       'upc_a',
       'upc_e'
     ];
-  } else if (method === 'wasm' || method === 'js') {
+  } else if (method === 'quirc' || method === 'jsqr') {
     return [ 'qr_code' ];
   } else {
     return [];

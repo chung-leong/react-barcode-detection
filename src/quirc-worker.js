@@ -22,9 +22,10 @@ const methods = {
     const { _begin, _end, _count, _get, _get_length, _get_type, _get_corners, HEAP8 } = wasm;
     const bufPtr = _begin();
     const heap = HEAP8.buffer;
-    const buffer = new Uint8Array(heap, bufPtr, width * height);
+    const pixelCount = width * height;
+    const buffer = new Uint8Array(heap, bufPtr, pixelCount);
     // convert image data to greyscale 
-    for (let i = 0, j = 0; i < width * height; i++, j += 4) {
+    for (let i = 0, j = 0; i < pixelCount; i++, j += 4) {
       const r = data[j + 0];
       const g = data[j + 1];
       const b = data[j + 2];
@@ -33,14 +34,23 @@ const methods = {
     }
     // scan it
     _end();
-    const count = _count();
+    let count = _count();
+    if (count === 0) {
+      // try inverting the image
+      _begin();
+      for (let i = 0; i < pixelCount; i++) {
+        buffer[i] = 255 - buffer[i];
+      }
+      _end();
+      count = _count();
+    }
     const barcodes = [];
     for (let i = 0; i < count; i++) {
       const bytePtr = _get(i);
       if (bytePtr) {
         // convert bytes into a string
         const length = _get_length();
-        const bytes = new Uint8Array(heap, rawPtr, length);
+        const bytes = new Uint8Array(heap, bytePtr, length);
         const type = _get_type();
         let rawValue;
         try {
@@ -67,7 +77,7 @@ const methods = {
           maxY = Math.max(y, maxY);
         }
         const boundingBox = new DOMRectReadOnly(minX, minY, maxX - minX, maxY - minY);
-        barcodes.push({ boundingBox, cornerPoints });
+        barcodes.push({ rawValue, boundingBox, cornerPoints });
       }
     }
     return barcodes;
@@ -91,6 +101,3 @@ onmessage = async function({ data: { name, args} }) {
     postMessage({ type: 'error', message: err.message });
   }
 }
-
-
-
