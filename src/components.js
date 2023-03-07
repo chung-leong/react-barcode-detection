@@ -79,7 +79,9 @@ export function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoi
     fill: bbFill, 
     stroke: bbStroke, 
     lineWidth: bbLineWidth = 2, 
-    radii: bbRadii = 0 
+    radii: bbRadii = 0,
+    gap: bbGap = 0,
+    margin: bbMargin = 0, 
   } = boundingBox ?? {};
   const { 
     fill: cpFill, 
@@ -93,13 +95,38 @@ export function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoi
     ctx.clearRect(0, 0, width, height);
     for (const { boundingBox, cornerPoints } of barcodes) {
       if (bbFill || bbStroke) {
-        const { left, top, width, height } = boundingBox;
-        ctx.beginPath();
-        if (ctx.roundRect) {
-          ctx.roundRect(left, top, width, height, bbRadii);
-        } else {
-          ctx.rect(left, top, width, height);
+        let { left, top, right, bottom, width, height } = boundingBox;
+        if (bbMargin > 0) {
+          const vMargin = height * bbMargin;
+          const wMargin = width * bbMargin;
+          left -= wMargin;
+          right += wMargin;
+          top -= vMargin;
+          bottom += vMargin;
+          width += wMargin * 2;
+          height += vMargin * 2;
         }
+        const vLen = height * (1 - bbGap) / 2;
+        const wLen = width * (1 - bbGap) / 2;
+        ctx.beginPath();
+        ctx.moveTo(left, top + vLen);
+        ctx.arcTo(left, top, left + wLen, top, bbRadii);
+        ctx.lineTo(left + wLen, top);
+        if (bbGap) {
+          ctx.moveTo(right - wLen, top);
+        }
+        ctx.arcTo(right, top, right, top + vLen, bbRadii);
+        ctx.lineTo(right, top + vLen);
+        if (bbGap) {
+          ctx.moveTo(right, bottom - vLen);
+        }
+        ctx.arcTo(right, bottom, right - wLen, bottom, bbRadii);
+        ctx.lineTo(right - wLen, bottom);
+        if (bbGap) {
+          ctx.moveTo(left + wLen, bottom);
+        }
+        ctx.arcTo(left, bottom, left, bottom - vLen, bbRadii);
+        ctx.lineTo(left, bottom - vLen);
         if (bbFill) {
           ctx.fillStyle = bbFill;
           ctx.fill();
