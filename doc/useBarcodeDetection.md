@@ -1,0 +1,2 @@
+# useBarcodeDetection(options = {})
+

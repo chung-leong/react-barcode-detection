@@ -17,7 +17,7 @@ const methods = {
       }  
       prepared = true;
     }
-
+  
     // get pointer from WASM
     const { _begin, _end, _count, _get, _get_length, _get_type, _get_corners, HEAP8 } = wasm;
     const bufPtr = _begin();
@@ -36,7 +36,7 @@ const methods = {
     _end();
     let count = _count();
     if (count === 0) {
-      // try inverting the image
+      // try with image inverted
       _begin();
       for (let i = 0; i < pixelCount; i++) {
         buffer[i] = 255 - buffer[i];
@@ -52,42 +52,38 @@ const methods = {
         const length = _get_length();
         const bytes = new Uint8Array(heap, bytePtr, length);
         const type = _get_type();
-        let rawValue;
-        try {
-          if (type === 8) { // kanji
-            rawValue = decode(bytes, 'shift-jis');
-          } else {
-            rawValue = decode(bytes, 'utf-8');
+        const rawValue = (() => {
+          const encodings = [ 'utf-8', 'iso-8859-1' ];
+          if (type === 8) { // Kanji
+            encodings.unshift('shift-jis');
           }
-        } catch (err) {
-          rawValue = decode(bytes, 'iso-8859-1');
-        }
+          for (const encoding of encodings) {
+            try {
+              return new TextDecoder(encoding).decode(bytes);
+            } catch (err) {
+            }
+          }  
+        })();
         // extract corners
         const cornerPtr = _get_corners();
         const coords = new Int32Array(heap, cornerPtr, 8);
         const cornerPoints = [];
-        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         for (let j = 0; j < 4; j++) {
           const x = coords[j * 2];
           const y = coords[j * 2 + 1];
           cornerPoints.push({ x, y });
-          minX = Math.min(x, minX);
-          minY = Math.min(y, minY);
-          maxX = Math.max(x, maxX);
-          maxY = Math.max(y, maxY);
         }
+        // bounding rect
+        const xs = cornerPoints.map(p => p.x), ys = cornerPoints.map(p => p.y);
+        const minX = Math.min(...xs), maxX = Math.max(...xs);
+        const minY = Math.min(...ys), maxY = Math.max(...ys);
         const boundingBox = new DOMRectReadOnly(minX, minY, maxX - minX, maxY - minY);
         barcodes.push({ rawValue, boundingBox, cornerPoints });
       }
     }
     return barcodes;
-  }   
+  }     
 };
-
-function decode(bytes, encoding) {
-  const decoder = new TextDecoder(encoding);
-  return decoder.decode(bytes);
-}
 
 onmessage = async function({ data: { name, args} }) {
   try {

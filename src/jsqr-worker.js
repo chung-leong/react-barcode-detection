@@ -16,7 +16,7 @@ const methods = {
       barcodes.push({ rawValue: data, boundingBox, cornerPoints });
     }
     return barcodes;
-  }   
+  }
 };
 
 onmessage = async function({ data: { name, args} }) {
@@ -31,6 +31,3 @@ onmessage = async function({ data: { name, args} }) {
     postMessage({ type: 'error', message: err.message });
   }
 }
-
-
-

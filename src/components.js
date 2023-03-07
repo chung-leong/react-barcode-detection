@@ -1,6 +1,6 @@
 import { createElement, useEffect, useRef } from 'react';
 import { useBarcodeDetection } from './hooks.js';
-import { StreamVideo } from 'react-media-capture';
+import { StreamVideo, BlobImage } from 'react-media-capture';
 
 const defCP = { 
   stroke: 'rgba(0, 255, 0, 0.8)',
@@ -14,21 +14,26 @@ export function BarcodeScanner(props) {
     children,
     delay = 0, 
     onData, 
-    onBarcodes, 
+    onBarcodes,
+    onSnapshot, 
     ...options 
   } = props;
   if (delay > 0) {
     options.clearInterval = Infinity;
   }
+  if (onSnapshot) {
+    options.snapshot = true;
+  }
   const { 
     status,
     liveVideo,
+    capturedImage,
     barcodes,
     lastError,
   } = useBarcodeDetection(options);
   let content, overlay
   if (liveVideo) {
-    const { stream: srcObject, width, height } = liveVideo;
+    const { stream, width, height } = liveVideo;
     const style = { 
       position: 'absolute',
       left: 0,
@@ -37,7 +42,12 @@ export function BarcodeScanner(props) {
       height: '100%', 
       objectFit: 'contain',
     };
-    content = createElement(StreamVideo, { srcObject, style });
+    if (capturedImage) {
+      const { blob } = capturedImage;
+      content = createElement(BlobImage, { srcObject: blob, style });
+    } else {
+      content = createElement(StreamVideo, { srcObject: stream, style });
+    }
     if (cornerPoints || boundingBox) {
       overlay = createElement(BarcodeOverlay, { barcodes, width, height, boundingBox, cornerPoints, style });
     }
@@ -57,6 +67,7 @@ export function BarcodeScanner(props) {
       const notify = () => {
         onBarcodes?.(list);
         onData?.(list[0]?.rawValue);
+        onSnapshot?.(capturedImage);
       };
       if (delay > 0) {
         // call handler only once
@@ -67,7 +78,7 @@ export function BarcodeScanner(props) {
         notify();
       }
     }
-  }, [ barcodes, onData, onBarcodes, delay ]);
+  }, [ barcodes, capturedImage, onData, onBarcodes, onSnapshot, delay ]);
   if (lastError) {
     return createElement('div', {}, lastError.message);
   }
@@ -158,6 +169,9 @@ export function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoi
         }
       }
     }
-  }, [ barcodes, width, height, bbFill, bbStroke, bbLineWidth, bbRadii, cpFill, cpStroke, cpLineWidth ]);
+  }, [ barcodes, width, height, 
+    bbFill, bbStroke, bbLineWidth, bbRadii, bbGap, bbMargin,
+    cpFill, cpStroke, cpLineWidth 
+  ]);
   return createElement('canvas', { ref, width, height, style });
 }

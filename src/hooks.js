@@ -26,7 +26,7 @@ export function useBarcodeDetection(options = {}) {
     watchVolume: false,
   });
   const snapshotBarcodes = useRef();
-  return useSequentialState(async function*({ initial, manageEvents }) {
+  return useSequentialState(async function*({ initial, manageEvents, signal }) {
     const formats = split(accept);
     const {
       liveVideo,
@@ -97,9 +97,9 @@ export function useBarcodeDetection(options = {}) {
             worker = new Worker(new URL('./jsqr-worker.js', import.meta.url));
           }
           // our "poor-man's comlink", as that lib doesn't work well with CRA
+          worker.addEventListener('message', on.message, { signal });
           const call = async (name, args, transfer) => {
             worker.postMessage({ name, args }, transfer);
-            worker.addEventListener('message', on.message, { once: true });
             const { message: { data } } = await eventual.message;
             if (data.type === 'error') {
               throw new Error(data.message);
@@ -121,6 +121,8 @@ export function useBarcodeDetection(options = {}) {
               yield call('detect', [ image ], [ image.data.buffer ]);        
             }  
           } finally {
+            // this will execute when the caller exits out of its 
+            // for-await-of loop 
             worker.terminate();
           }
         }
@@ -130,7 +132,6 @@ export function useBarcodeDetection(options = {}) {
       for await (const newBarcodes of generator) {
         if (newBarcodes.length > 0) {
           barcodes = newBarcodes;
-          console.log({ snapshot });
           if (snapshot) {
             // calling snap() will cause useMediaCapture() to return a new state,
             // which would shutdown this generator; the new generator will pick up 
