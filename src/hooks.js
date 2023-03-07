@@ -1,5 +1,6 @@
 import { useMediaCapture } from 'react-media-capture';
 import { useSequentialState } from 'react-seq';
+import { useRef } from 'react';
 
 export function useBarcodeDetection(options = {}) {
   const isMobileDevice = /Mobi/i.test(window.navigator.userAgent);
@@ -9,6 +10,7 @@ export function useBarcodeDetection(options = {}) {
     selectNewDevice = true,
     accept = 'qr_code',
     use = isMobileDevice ? 'api,quirc,jsqr' : 'api,jsqr',
+    snapshot = false,
     scanInterval = 250,
     scanIntervalPositive = 50,
     clearInterval = 250,
@@ -23,10 +25,12 @@ export function useBarcodeDetection(options = {}) {
     selectNewDevice,
     watchVolume: false,
   });
+  const snapshotBarcodes = useRef();
   return useSequentialState(async function*({ initial, manageEvents }) {
     const formats = split(accept);
     const {
       liveVideo,
+      capturedImage,
       devices,
       selectedDeviceId,
 
@@ -45,14 +49,12 @@ export function useBarcodeDetection(options = {}) {
       return {
         status,
         liveVideo,
+        capturedImage,
         devices,
-        selectedDeviceId,
         barcodes,
-        lastError,
-
-        snap,
-        clear,
+        selectedDeviceId,
         selectDevice,
+        lastError,
       };
     }
 
@@ -60,6 +62,9 @@ export function useBarcodeDetection(options = {}) {
       status = 'denied';
     } else if (status === 'previewing') {
       status = 'scanning';
+    } else if (status === 'recorded') {
+      barcodes = snapshotBarcodes.current;
+      capturedImage.clear = clear;
     }
     initial(currentState());
     if (status !== 'scanning') {
@@ -125,6 +130,15 @@ export function useBarcodeDetection(options = {}) {
       for await (const newBarcodes of generator) {
         if (newBarcodes.length > 0) {
           barcodes = newBarcodes;
+          console.log({ snapshot });
+          if (snapshot) {
+            // calling snap() will cause useMediaCapture() to return a new state,
+            // which would shutdown this generator; the new generator will pick up 
+            // the barcodes and yield it along with capturedImage
+            snap();
+            snapshotBarcodes.current = barcodes;
+            return;
+          }
           yield currentState();
           clearAllowance = clearInterval;
         } else if (barcodes.length > 0) {
@@ -142,7 +156,7 @@ export function useBarcodeDetection(options = {}) {
       lastError = err;
       yield currentState();
     }
-  }, [ state, method, supported, accept, scanInterval, scanIntervalPositive, clearInterval ]);
+  }, [ state, method, supported, accept, snapshot, scanInterval, scanIntervalPositive, clearInterval ]);
 }
 
 function selectMethod(use) {
