@@ -72,14 +72,21 @@ export function useBarcodeDetection(options = {}) {
     }
 
     try {
-      // create video element and wait for it to come online
-      const video = document.createElement('VIDEO');
-      video.srcObject = liveVideo.stream;
-      video.muted = true;
-      video.oncanplay = on.videoReadiness;
-      video.onerror = on.videoReadiness.throw;
-      video.play();
-      await eventual.videoReadiness;
+      // look for video element that's using the live stream
+      const { stream } = liveVideo;
+      const elements = [ ...document.getElementsByTagName('VIDEO') ];
+      let video = elements.find(v => v.srcObject === stream);
+      if (!video) {
+        // create video element and wait for it to come online
+        video = document.createElement('VIDEO');
+        video.srcObject = liveVideo.stream;
+        video.muted = true;
+        video.playsInline = true;
+        video.oncanplay = on.videoReadiness;
+        video.onerror = on.videoReadiness.throw;
+        video.play();      
+        await eventual.videoReadiness;  
+      }
     
       // create generator
       const generator = (async function *() {
@@ -112,9 +119,10 @@ export function useBarcodeDetection(options = {}) {
             const canvas = document.createElement('CANVAS');
             canvas.width = videoWidth;
             canvas.height = videoHeight;
-            const context = canvas.getContext('2d', { willReadFrequently: true });
+            const context = canvas.getContext('2d');
             for (;;) {
               // draw into canvas and obtain image data
+              context.clearRect(0, 0, 100, 100);
               context.drawImage(video, 0, 0, videoWidth, videoHeight);
               const image = context.getImageData(0, 0, videoWidth, videoHeight);
               // transfer image data to worker
