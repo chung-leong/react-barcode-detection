@@ -119,7 +119,7 @@ export function useBarcodeDetection(options = {}) {
             const canvas = document.createElement('CANVAS');
             canvas.width = videoWidth;
             canvas.height = videoHeight;
-            const context = canvas.getContext('2d');
+            const context = canvas.getContext('2d', { willReadFrequently: true });
             for (;;) {
               // draw into canvas and obtain image data
               context.clearRect(0, 0, 100, 100);
