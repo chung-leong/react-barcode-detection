@@ -2,17 +2,12 @@ import { createElement, useEffect, useRef } from 'react';
 import { useBarcodeDetection } from './hooks.js';
 import { StreamVideo, BlobImage } from 'react-media-capture';
 
-const defCP = { 
-  stroke: 'rgba(0, 255, 0, 0.8)',
-  lineWidth: 3,
-};  
-
 export function BarcodeScanner(props) {
   const { 
     boundingBox, 
-    cornerPoints = defCP, 
-    children,
+    cornerPoints, 
     delay = 0, 
+    children,
     onData, 
     onBarcodes,
     onSnapshot, 
