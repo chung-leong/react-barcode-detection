@@ -1,9 +1,9 @@
 import { useMediaCapture } from 'react-media-capture';
-import { useSequentialState } from 'react-seq';
+import { useSequentialState, delay } from 'react-seq';
 import { useRef } from 'react';
 
 export function useBarcodeDetection(options = {}) {
-  const isMobileDevice = /Mobi/i.test(window.navigator.userAgent);
+  const isMobileDevice = (typeof(window) === 'object') ? /Mobi/i.test(window.navigator?.userAgent) : false;
   const {
     active = true,
     preferredDevice = 'back',
@@ -58,7 +58,7 @@ export function useBarcodeDetection(options = {}) {
       };
     }
 
-    if (!supported) {
+    if (!supported && active) {
       status = 'denied';
     } else if (status === 'previewing') {
       status = 'scanning';
@@ -73,27 +73,34 @@ export function useBarcodeDetection(options = {}) {
     }
 
     try {
-      // look for video element that's using the live stream
+      // give React a chance to make use of the live stream
+      await delay(0);
+      // look for video element that's using the stream
       const { stream } = liveVideo;
       const elements = [ ...document.getElementsByTagName('VIDEO') ];
       let video = elements.find(v => v.srcObject === stream);
       if (!video) {
-        // create video element and wait for it to come online
+        // create video element 
         video = document.createElement('VIDEO');
         video.srcObject = liveVideo.stream;
         video.muted = true;
         video.playsInline = true;
-        video.oncanplay = on.videoReadiness;
-        video.onerror = on.videoReadiness.throw;
         video.play();      
-        await eventual.videoReadiness;  
       }
+      if (video.readyState !== 4) {
+        // wait for it to come online
+        video.addEventListener('canplay', on.videoReadiness, { once: true });
+        video.addEventListener('error', on.videoReadiness.throw, { once: true });
+        await eventual.videoReadiness;    
+      }
+
       // use a generator to isolate the barcode detection code
       const generator = (async function*() {
         if (method === 'api') {
           const detector = new window.BarcodeDetector({ formats });
           for (;;) {
             yield detector.detect(video);
+            /* c8 ignore next */
           }
         } else if (method === 'quirc' || method === 'jsqr') {
           // need to pass static string to URL in order for Webpack to pick it up
@@ -127,6 +134,7 @@ export function useBarcodeDetection(options = {}) {
               const image = context.getImageData(0, 0, videoWidth, videoHeight);
               // transfer image data to worker
               yield call('detect', [ image ], [ image.data.buffer ]);        
+              /* c8 ignore next */
             }  
           } finally {
             // this will execute when the caller exits out of its 
