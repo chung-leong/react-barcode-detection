@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BarcodeScanner } from './react-barcode-detection';
+import { BarcodeScanner } from 'react-barcode-detection';
 import './css/App.css';
 
 const bb = {
