@@ -122,7 +122,7 @@ describe('Hooks', function() {
           kind: 'videoinput',
           label: 'Spy camera',
         });
-        await withTestRenderer(async ({ render, unmount }) => {
+        await withTestRenderer(async ({ render }) => {
           let state;
           let createdBefore;
           function Test() {
@@ -141,10 +141,170 @@ describe('Hooks', function() {
           const video = document.created.find(v => v.srcObject === stream );
           expect(video).to.not.be.undefined;
           expect(createdBefore).to.not.include(video);
-          await unmount();
         });
       });
     })
+    it('should use jsqr on when there is no BarcodeDetector', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        delete window.BarcodeDetector;
+        delete global.BarcodeDetector;
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useBarcodeDetection({ scanInterval: 25 });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { status, liveVideo: { stream } } = state;
+          expect(status).to.equal('scanning');
+          const video = document.created.find(v => v.srcObject === stream);
+          expect(video).to.not.be.undefined;
+          video.barcodes = [ { rawValue: 'hello world', type: 'qr_code' } ];
+          const [ worker ] = window.workers;
+          expect(worker).to.not.be.undefined;
+          expect(worker.url.toString()).to.contain('jsqr-worker');
+          await delay(35);
+          const { barcodes } = state;
+          expect(barcodes).to.have.lengthOf(1);
+        });
+      });
+    })
+    it('should use jsqr on when there is no BarcodeDetector or WebAssembly', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        delete window.BarcodeDetector;
+        delete global.BarcodeDetector;
+        delete window.WebAssembly;
+        delete global.WebAssembly;
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useBarcodeDetection({ use: 'api,quirc,jsqr', scanInterval: 25 });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { status, liveVideo: { stream } } = state;
+          expect(status).to.equal('scanning');
+          const video = document.created.find(v => v.srcObject === stream);
+          expect(video).to.not.be.undefined;
+          video.barcodes = [ { rawValue: 'hello world', type: 'qr_code' } ];
+          const [ worker ] = window.workers;
+          expect(worker).to.not.be.undefined;
+          expect(worker.url.toString()).to.contain('jsqr-worker');
+          await delay(35);
+          const { barcodes } = state;
+          expect(barcodes).to.have.lengthOf(1);
+        });
+      });
+    })
+    it('should use jsqr on when only jsqr is specified', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useBarcodeDetection({ use: 'jsqr', scanInterval: 25 });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { status, liveVideo: { stream } } = state;
+          expect(status).to.equal('scanning');
+          const video = document.created.find(v => v.srcObject === stream);
+          expect(video).to.not.be.undefined;
+          video.barcodes = [ { rawValue: 'hello world', type: 'qr_code' } ];
+          const [ worker ] = window.workers;
+          expect(worker).to.not.be.undefined;
+          expect(worker.url.toString()).to.contain('jsqr-worker');
+          await delay(35);
+          const { barcodes } = state;
+          expect(barcodes).to.have.lengthOf(1);
+        });
+      });
+    })
+    it('should use quirc on when WebAssembly is available', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useBarcodeDetection({ use: 'quirc,jsqr', scanInterval: 25 });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { status, liveVideo: { stream } } = state;
+          expect(status).to.equal('scanning');
+          const video = document.created.find(v => v.srcObject === stream);
+          expect(video).to.not.be.undefined;
+          video.barcodes = [ { rawValue: 'hello world', type: 'qr_code' } ];
+          const [ worker ] = window.workers;
+          expect(worker).to.not.be.undefined;
+          expect(worker.url.toString()).to.contain('quirc-worker');
+          await delay(35);
+          const { barcodes } = state;
+          expect(barcodes).to.have.lengthOf(1);
+        });
+      });
+    })
+    it('should capture image when snapshot is true', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useBarcodeDetection({ scanInterval: 25, snapshot: true });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { status, liveVideo: { stream } } = state;
+          expect(status).to.equal('scanning');
+          const video = document.created.find(v => v.srcObject === stream);
+          expect(video).to.not.be.undefined;
+          video.barcodes = [ { rawValue: 'hello world', type: 'qr_code' } ];
+          await delay(35);
+          const { barcodes, capturedImage } = state;
+          expect(barcodes).to.have.lengthOf(1);
+          expect(capturedImage).to.not.be.undefined;
+          expect(capturedImage.blob.type).to.equal('image/jpeg');
+        });
+      });
+    })
+
 
   })
 })

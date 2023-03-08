@@ -3,13 +3,12 @@ import { useSequentialState, delay } from 'react-seq';
 import { useRef } from 'react';
 
 export function useBarcodeDetection(options = {}) {
-  const isMobileDevice = (typeof(window) === 'object') ? /Mobi/i.test(window.navigator?.userAgent) : false;
   const {
     active = true,
     preferredDevice = 'back',
     selectNewDevice = true,
     accept = 'qr_code',
-    use = isMobileDevice ? 'api,quirc,jsqr' : 'api,jsqr',
+    use = 'api,jsqr',
     snapshot = false,
     scanInterval = 250,
     scanIntervalPositive = 50,
@@ -97,7 +96,7 @@ export function useBarcodeDetection(options = {}) {
       // use a generator to isolate the barcode detection code
       const generator = (async function*() {
         if (method === 'api') {
-          const detector = new window.BarcodeDetector({ formats });
+          const detector = new BarcodeDetector({ formats });
           for (;;) {
             yield detector.detect(video);
             /* c8 ignore next */
@@ -151,7 +150,7 @@ export function useBarcodeDetection(options = {}) {
             // calling snap() will cause useMediaCapture() to return a new state,
             // which would shutdown this generator; the new generator will pick up 
             // the barcodes and yield it along with capturedImage
-            snap();
+            snap({ mimeType: 'image/jpeg', quality: 0.9 });
             snapshotBarcodes.current = barcodes;
             return;
           }

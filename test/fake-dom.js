@@ -29,6 +29,10 @@ class Window extends EventTarget {
     this.HTMLCanvasElement = HTMLCanvasElement;
     this.HTMLVideoElement = HTMLVideoElement;
     this.BarcodeDetector = BarcodeDetector;
+    this.WebAssembly = {};
+    this.Worker = Worker;
+
+    this.workers = [];
   }
 }
 
@@ -160,7 +164,7 @@ class HTMLCanvasElement extends EventTarget {
   }
 
   toBlob(cb, mimeType, quality) {
-    setTimeout(() => cb({ type: 'blob', mimeType, quality }), 0);
+    setTimeout(() => cb({ type: 'blob', type: mimeType }), 0);
   }
 
   toDataURL() {
@@ -179,7 +183,28 @@ function fetch(url) {
 }
 
 class CanvasRenderingContext2D {
-  drawImage() {
+  clearRect() {
+    this.video = null;
+  }
+
+  drawImage(video) {
+    this.video = video;
+  }
+
+  getImageData() {
+    const { width, height, barcodes } = this.video;
+    const data = new Uint8ClampedArray(0);
+    const image = new ImageData(data, width, height);
+    image.barcodes = barcodes;
+    return image;
+  }
+}
+
+class ImageData {
+  constructor(data, width, height) {
+    this.data = data;
+    this.width = width;
+    this.height = height;
   }
 }
 
@@ -188,6 +213,7 @@ class Navigator extends EventTarget {
     super();
     this.mediaDevices = new MediaDevices();
     this.permissions = new Permissions();
+    this.userAgent = '';
   }
 }
 
@@ -422,6 +448,33 @@ class MediaStreamAudioSourceNode {
 class BarcodeDetector {
   async detect(source) {
     return source.barcodes ?? [];
+  }
+}
+
+class Worker extends EventTarget {
+  static list = [];
+
+  constructor(url) {
+    super();
+    this.url = url;
+    this.terminated = false;
+    window.workers.push(this);
+  }
+
+  terminate() {
+    this.terminated = true;
+  }
+
+  postMessage(msg, transfer) {
+    if (msg.name === 'detect') {
+      const [ image ] = msg.args;
+      const result = image.barcodes ?? [];
+      setTimeout(() => {
+        const evt = new Event('message');
+        evt.data = { type: 'result', result };
+        this.dispatchEvent(evt);
+      }, 0);
+    }
   }
 }
 
