@@ -14,3 +14,5 @@ if (!global.Event) {
 global.resolve = (path) => {
   return (new URL(path, import.meta.url)).pathname;
 };
+
+process.env.NODE_ENV = 'development';

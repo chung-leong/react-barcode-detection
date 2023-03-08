@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createElement } from 'react';
-import { withTestRenderer } from './test-renderer.js';
+import { withTestRenderer, withSilentConsole } from './test-renderer.js';
 import { withFakeDOM } from './fake-dom.js';
 import { delay } from 'react-seq';
 
@@ -274,6 +274,38 @@ describe('Hooks', function() {
         });
       });
     })
+    it('should receive error from worker', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useBarcodeDetection({ use: 'quirc,jsqr', scanInterval: 25 });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { status, liveVideo: { stream } } = state;
+          expect(status).to.equal('scanning');
+          const video = document.created.find(v => v.srcObject === stream);
+          expect(video).to.not.be.undefined;
+          video.error = new Error('Doh!');
+          const [ worker ] = window.workers;
+          expect(worker).to.not.be.undefined;
+          expect(worker.url.toString()).to.contain('quirc-worker');
+          await delay(35);
+          const { barcodes, lastError } = state;
+          expect(lastError).to.be.an('error');
+          expect(lastError.message).to.equal('Doh!');
+        });
+      });
+    })
     it('should capture image when snapshot is true', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
@@ -304,7 +336,95 @@ describe('Hooks', function() {
         });
       });
     })
-
-
+    it('should clear barcodes when clear interval is reached', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render }) => {
+          let state;
+          function Test() {
+            state = useBarcodeDetection({ scanInterval: 25, scanIntervalPositive: 5, clearInterval: 50 });
+            return null;                
+          }
+          const el = createElement(Test);
+          await render(el);
+          await delay(10);
+          const { status, liveVideo: { stream } } = state;
+          expect(status).to.equal('scanning');
+          const video = document.created.find(v => v.srcObject === stream);
+          expect(video).to.not.be.undefined;
+          video.barcodes = [ { rawValue: 'hello world', type: 'qr_code' } ];
+          await delay(35);
+          const { barcodes: before } = state;
+          expect(before).to.have.lengthOf(1);
+          video.barcodes = [];
+          await delay(15);
+          const { barcodes: after15 } = state;
+          expect(after15).to.have.lengthOf(1);
+          await delay(15);
+          const { barcodes: after30 } = state;
+          expect(after30).to.have.lengthOf(1);
+          await delay(45);
+          const { barcodes: after75 } = state;
+          expect(after75).to.have.lengthOf(0);
+        });
+      });
+    })
+    it('should output warning to console when method is unrecognized', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render }) => {
+          const output = {};
+          await withSilentConsole(async () => {
+            let state;
+            function Test() {
+              state = useBarcodeDetection({ use: 'cocaine' });
+              return null;                
+            }
+            const el = createElement(Test);
+            await render(el);
+            await delay(10);
+            const { status, liveVideo } = state;
+            expect(status).to.equal('denied');  
+          }, output);
+          expect(output.warn).to.contain('cocaine');
+        });
+      });
+    })
+    it('should output warning to console when format is not supported', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render }) => {
+          const output = {};
+          await withSilentConsole(async () => {
+            let state;
+            function Test() {
+              state = useBarcodeDetection({ accept: 'cocaine' });
+              return null;                
+            }
+            const el = createElement(Test);
+            await render(el);
+            await delay(10);
+            const { status, liveVideo } = state;
+            expect(status).to.equal('denied');  
+          }, output);
+          expect(output.warn).to.contain('cocaine');
+        });
+      });
+    })
   })
 })

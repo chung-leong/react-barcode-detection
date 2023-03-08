@@ -99,7 +99,7 @@ export function useBarcodeDetection(options = {}) {
           const detector = new BarcodeDetector({ formats });
           for (;;) {
             yield detector.detect(video);
-            /* c8 ignore next */
+            /* c8 ignore next -- unreachable */
           }
         } else if (method === 'quirc' || method === 'jsqr') {
           // need to pass static string to URL in order for Webpack to pick it up
@@ -133,7 +133,7 @@ export function useBarcodeDetection(options = {}) {
               const image = context.getImageData(0, 0, videoWidth, videoHeight);
               // transfer image data to worker
               yield call('detect', [ image ], [ image.data.buffer ]);        
-              /* c8 ignore next */
+              /* c8 ignore next -- unreachable */
             }  
           } finally {
             // this will execute when the caller exits out of its 
@@ -157,7 +157,7 @@ export function useBarcodeDetection(options = {}) {
           yield currentState();
           clearAllowance = clearInterval;
         } else if (barcodes.length > 0) {
-          clearAllowance -= scanInterval;
+          clearAllowance -= scanIntervalPositive;
           if (clearAllowance <= 0) {
             barcodes = newBarcodes;
             yield currentState();  
@@ -168,6 +168,7 @@ export function useBarcodeDetection(options = {}) {
         // component is unmounted
         await eventual.unmount.for(interval).milliseconds;
       }
+      /* c8 ignore next -- unreachable */ 
     } catch (err) {
       status = 'denied';
       lastError = err;
@@ -186,8 +187,10 @@ function selectMethod(use) {
       if (typeof(WebAssembly) === 'object' && typeof(Worker) === 'function') {
         return method;
       }
-    } else if (method === 'jsqr' && typeof(Worker) === 'function') {
-      return method;
+    } else if (method === 'jsqr') {
+      if (typeof(Worker) === 'function') {
+        return method;
+      }
     } else {
       if (process.env.NODE_ENV === 'development') {
         console.warn(`Unknown method: ${method}`);
@@ -204,7 +207,9 @@ function hasSupport(method, accept) {
     return true;
   } else {
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`No support for barcode format(s): ${missing.join(', ')}`);
+      if (method) {
+        console.warn(`No support for barcode format(s): ${missing.join(', ')}`);
+      }
     }
     return false;
   }

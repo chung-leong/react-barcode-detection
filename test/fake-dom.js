@@ -192,10 +192,11 @@ class CanvasRenderingContext2D {
   }
 
   getImageData() {
-    const { width, height, barcodes } = this.video;
+    const { width, height, barcodes, error } = this.video;
     const data = new Uint8ClampedArray(0);
     const image = new ImageData(data, width, height);
     image.barcodes = barcodes;
+    image.error = error;
     return image;
   }
 }
@@ -468,10 +469,15 @@ class Worker extends EventTarget {
   postMessage(msg, transfer) {
     if (msg.name === 'detect') {
       const [ image ] = msg.args;
-      const result = image.barcodes ?? [];
       setTimeout(() => {
         const evt = new Event('message');
-        evt.data = { type: 'result', result };
+        if (image.error) {
+          const { message } = image.error;
+          evt.data = { type: 'error', message };
+        } else {
+          const result = image.barcodes ?? [];
+          evt.data = { type: 'result', result };  
+        }
         this.dispatchEvent(evt);
       }, 0);
     }
