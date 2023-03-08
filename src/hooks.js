@@ -63,6 +63,7 @@ export function useBarcodeDetection(options = {}) {
     } else if (status === 'previewing') {
       status = 'scanning';
     } else if (status === 'recorded') {
+      // barcodes captured by previous generator just prior to call to snap()
       barcodes = snapshotBarcodes.current;
       capturedImage.clear = clear;
     }
@@ -87,9 +88,8 @@ export function useBarcodeDetection(options = {}) {
         video.play();      
         await eventual.videoReadiness;  
       }
-    
-      // create generator
-      const generator = (async function *() {
+      // use a generator to isolate the barcode detection code
+      const generator = (async function*() {
         if (method === 'api') {
           const detector = new window.BarcodeDetector({ formats });
           for (;;) {
@@ -135,7 +135,6 @@ export function useBarcodeDetection(options = {}) {
           }
         }
       })();
-      // look for barcodes continually
       let clearAllowance = 0;
       for await (const newBarcodes of generator) {
         if (newBarcodes.length > 0) {
@@ -158,7 +157,9 @@ export function useBarcodeDetection(options = {}) {
           }
         }
         const interval = (barcodes.length > 0) ? scanIntervalPositive : scanInterval;
-        await eventual.dismount.for(interval).milliseconds;
+        // nothing calls on.unmount--statement will throw, however, when the 
+        // component is unmounted
+        await eventual.unmount.for(interval).milliseconds;
       }
     } catch (err) {
       status = 'denied';
@@ -175,10 +176,10 @@ function selectMethod(use) {
         return method;
       }
     } else if (method === 'quirc') {
-      if (typeof(WebAssembly) === 'object') {
+      if (typeof(WebAssembly) === 'object' && typeof(Worker) === 'function') {
         return method;
       }
-    } else if (method === 'jsqr') {
+    } else if (method === 'jsqr' && typeof(Worker) === 'function') {
       return method;
     } else {
       if (process.env.NODE_ENV === 'development') {

@@ -85,7 +85,7 @@ function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoints, st
   const { 
     fill: bbFill, 
     stroke: bbStroke, 
-    lineWidth: bbLineWidth = 2, 
+    lineWidth: bbLineWidth = 1,
     radii: bbRadii = 0,
     gap: bbGap = 0,
     margin: bbMargin = 0, 
@@ -93,7 +93,7 @@ function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoints, st
   const { 
     fill: cpFill, 
     stroke: cpStroke,
-    lineWidth: cpLineWidth = 2, 
+    lineWidth: cpLineWidth = 1,
   } = cornerPoints ?? {};
   const ref = useRef();
   useEffect(() => {
