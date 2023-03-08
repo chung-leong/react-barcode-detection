@@ -27,8 +27,7 @@ export function BarcodeScanner(props) {
     lastError,
   } = useBarcodeDetection(options);
   let content, overlay
-  if (liveVideo) {
-    const { stream, width, height } = liveVideo;
+  if (liveVideo || capturedImage) {
     const style = { 
       position: 'absolute',
       left: 0,
@@ -38,12 +37,14 @@ export function BarcodeScanner(props) {
       objectFit: 'contain',
     };
     if (capturedImage) {
-      const { blob } = capturedImage;
-      content = createElement(BlobImage, { srcObject: blob, style });
+      const { blob: srcObject } = capturedImage;
+      content = createElement(BlobImage, { srcObject, style });
     } else {
-      content = createElement(StreamVideo, { srcObject: stream, style });
+      const { stream: srcObject } = liveVideo;
+      content = createElement(StreamVideo, { srcObject, style });
     }
     if (cornerPoints || boundingBox) {
+      const { width, height } = liveVideo || capturedImage;
       overlay = createElement(BarcodeOverlay, { barcodes, width, height, boundingBox, cornerPoints, style });
     }
   } else {
@@ -80,7 +81,7 @@ export function BarcodeScanner(props) {
   return createElement('div', { className: classList.join(' '), style: { position: 'relative' } }, content, overlay);
 }
 
-export function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoints, style }) {
+function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoints, style }) {
   const { 
     fill: bbFill, 
     stroke: bbStroke, 

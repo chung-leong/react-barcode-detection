@@ -1,6 +1,5 @@
 export {
   BarcodeScanner,
-  BarcodeOverlay,
 } from './src/components.js';
 export {
   useBarcodeDetection,
