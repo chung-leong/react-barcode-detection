@@ -1,4 +1,4 @@
-import Quirc from './wasm/quirc.js';
+import Quirc from './wasm/quirc.cjs';
 
 let wasm;
 let prepared = false;

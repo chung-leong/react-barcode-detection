@@ -1,6 +1,6 @@
 {
   "name": "react-barcode-detection",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "description": "Barcode detection",
   "main": "index.js",
   "type": "module",
@@ -27,7 +27,7 @@
   ],
   "files": [
     "src/*.js",
-    "src/wasm/*.js",
+    "src/wasm/*.cjs",
     "src/wasm/*.wasm",
     "index.js"
   ],
