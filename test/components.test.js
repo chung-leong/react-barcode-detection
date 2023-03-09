@@ -155,66 +155,6 @@ describe('Components', function() {
         });
       });
     })
-    it('should delay call to onData when delay is specified', async function() {
-      await withFakeDOM(async () => {
-        navigator.mediaDevices.addDevice({
-          deviceId: '007',
-          groupId: '007',
-          kind: 'videoinput',
-          label: 'Spy camera',
-        });
-        await withTestRenderer(async ({ render, toJSON }) => {
-          let data;
-          const onData = d => data = d;
-          const el = createElement(BarcodeScanner, { 
-            onData, 
-            scanInterval: 10, 
-            delay: 50 
-          });
-          const nodes = {};
-          const createNodeMock = ({ type, props }) => {
-            let node;
-            if (type === 'video') {
-              node = document.createElement('VIDEO');
-              document.elements.VIDEO = [ node ];
-            } else {
-              node = { ...props };
-            }
-            nodes[type] = node;
-            return node;
-          };
-          await render(el, { createNodeMock });
-          await delay(10);
-          const { props } = toJSON();
-          expect(props.className).to.equal('BarcodeScanner scanning');  
-          const { video } = nodes;
-          expect(video).to.not.be.undefined;
-          const barcode = {
-            format: 'qr_code',
-            rawValue: 'Hello world',
-            boundingBox: { 
-              left: 10,
-              top: 10,
-              right: 100,
-              bottom: 100,
-              width: 90,
-              height: 90,
-            },
-            cornerPoints: [
-              { x: 10, y: 10 },
-              { x: 100, y: 10 },
-              { x: 100, y: 100 },
-              { x: 10, y: 100 }
-            ],
-          }
-          video.barcodes = [ barcode ];
-          await delay(30);
-          expect(data).to.be.undefined;
-          await delay(50);
-          expect(data).to.equal('Hello world');
-        });
-      });
-    })
     it('should invoke onSnapshot when it is given', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({

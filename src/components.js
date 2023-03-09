@@ -6,16 +6,12 @@ export function BarcodeScanner(props) {
   const { 
     boundingBox, 
     cornerPoints, 
-    delay = 0, 
     children,
     onData, 
     onBarcodes,
     onSnapshot, 
     ...options 
   } = props;
-  if (delay > 0) {
-    options.clearInterval = Infinity;
-  }
   if (onSnapshot) {
     options.snapshot = true;
   }
@@ -53,27 +49,17 @@ export function BarcodeScanner(props) {
   if (barcodes.length > 0) {
     classList.push('found');
   }
-  const previous = useRef({ string: '[]', timer: 0 });
+  const previous = useRef('[]');
   useEffect(() => {
     const list = barcodes.map(({ format, rawValue }) => { return { format, rawValue } });
     const string = JSON.stringify(list);
-    if (string !== previous.current.string) {
-      previous.current.string = string;
-      const notify = () => {
-        onBarcodes?.(list);
-        onData?.(list[0]?.rawValue);
-        onSnapshot?.(capturedImage);
-      };
-      if (delay > 0) {
-        // call handler only once
-        if (!previous.current.timer) {
-          previous.current.timer = setTimeout(notify, delay); 
-        }
-      } else {
-        notify();
-      }
+    if (string !== previous.current) {
+      previous.current = string;
+      onBarcodes?.(list);
+      onData?.(list[0]?.rawValue);
+      onSnapshot?.(capturedImage);
     }
-  }, [ barcodes, capturedImage, onData, onBarcodes, onSnapshot, delay ]);
+  }, [ barcodes, capturedImage, onData, onBarcodes, onSnapshot ]);
   return createElement('div', { className: classList.join(' '), style: { position: 'relative' } }, content, overlay);
 }
 

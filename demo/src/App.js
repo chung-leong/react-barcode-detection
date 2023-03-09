@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { BarcodeScanner } from 'react-barcode-detection';
 import './css/App.css';
 
@@ -58,10 +58,15 @@ function SnapAndHold() {
 
 function FindAndStop() {
   const [ data, setData ] = useState();
+  const setDataLater = useCallback((data) => {
+    if (data) {
+      setTimeout(() => setData(data), 500);  
+    }
+  }, []);
   return (
     <div>
       {!data &&
-        <BarcodeScanner boundingBox={bb} cornerPoints={cp} onData={setData} delay={500}>
+        <BarcodeScanner boundingBox={bb} cornerPoints={cp} clearInterval={500} onData={setDataLater}>
           <NoCamera />
         </BarcodeScanner>
       }

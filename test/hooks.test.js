@@ -333,7 +333,7 @@ describe('Hooks', function() {
           const video = document.created.find(v => v.srcObject === stream);
           expect(video).to.not.be.undefined;
           video.barcodes = [ { rawValue: 'hello world', type: 'qr_code' } ];
-          await delay(35);
+          await delay(50);
           const { barcodes, capturedImage } = state;
           expect(barcodes).to.have.lengthOf(1);
           expect(capturedImage).to.not.be.undefined;
