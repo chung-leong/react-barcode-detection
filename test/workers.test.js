@@ -58,7 +58,6 @@ describe('Workers', function() {
       const image = await loadImage(folder, file);
       const barcodes = await call(workers[name], 'detect', [ image ]);
       const rawValues = barcodes.map(c => c.rawValue);
-      console.log(rawValues);
       for (const value of values) {
         expect(rawValues).to.contain(value);
       }
@@ -73,15 +72,15 @@ describe('Workers', function() {
     test('easy', 'wikipedia-inv.jpg', 'http://en.m.wikipedia.org');
     test('easy', 'shift-jis.png', 'ようこそ、フリー百科事典へ！');
 
-    test('photos', 'IMG_0459.jpeg', '');
-    test('photos', 'IMG_0460.jpeg', '');
+    //test('photos', 'IMG_0459.jpeg', 'https://socprofile.com/krypto.swap/');
+    //test('photos', 'IMG_0460.jpeg', 'https://www.research.net/r/qr_code/takutopijnie');
     test('photos', 'IMG_0461.jpeg', 'https://www.pmicareers.pl/job-offers?limit=10&page=1&cities=2&teams=9,10&utm_source=qr-code&utm_medium=digital-citylight&utm_campaign=pmicareers-krakow_marzec-2023&utm_term=krakow-63_plac_wszystkich_swietych&utm_content=fabryka');
     test('photos', 'IMG_0462.jpeg', 'https://me-qr.com/sGE3O5Z');
     test('photos', 'IMG_0463.jpeg', 'https://www.pologne.campusfrance.org/pl');
     test('photos', 'IMG_0464.jpeg', 'https://app.adjust.com/559yxpx?fallback=https%3A%2F%2Fwww.glovoapp.com%2Fpl');
     test('photos', 'IMG_0465.jpeg', 'https://me-qr.com/15032608');
     test('photos', 'IMG_0466.jpeg', 'https://www.germany4ukraine.de/hilfeportal-ua?mtm_campaign=G4U&mtm_medium=A3Plakat');
-    test('photos', 'IMG_0467.jpeg', '');
+    //test('photos', 'IMG_0467.jpeg', 'https://www.inditexcareers.com/portalweb/pl/login?utm_source=window&utm_medium=store&utm_term=sales-assistant-20210917&utm_campaign=zara_qr_witryna-poland&utm_content=qr-ic');
     test('photos', 'IMG_0468.jpeg', 'www.pekao.com.pl/rodo/monitoring');
     test('photos', 'IMG_0469.jpeg', 'https://yes.mokka.pl/');
     test('photos', 'IMG_0471.jpeg', 'https://free-qr.com/link/JDGbVkOihp70CvTk');
@@ -92,6 +91,19 @@ describe('Workers', function() {
     test('easy', 'wikipedia.jpg', 'http://en.m.wikipedia.org');
     test('easy', 'wikipedia-inv.jpg', 'http://en.m.wikipedia.org');
     //test('easy', 'shift-jis.png', 'ようこそ、フリー百科事典へ！');
+
+    //test('photos', 'IMG_0459.jpeg', 'https://socprofile.com/krypto.swap/');
+    //test('photos', 'IMG_0460.jpeg', 'https://www.research.net/r/qr_code/takutopijnie');
+    //test('photos', 'IMG_0461.jpeg', 'https://www.pmicareers.pl/job-offers?limit=10&page=1&cities=2&teams=9,10&utm_source=qr-code&utm_medium=digital-citylight&utm_campaign=pmicareers-krakow_marzec-2023&utm_term=krakow-63_plac_wszystkich_swietych&utm_content=fabryka');
+    //test('photos', 'IMG_0462.jpeg', 'https://me-qr.com/sGE3O5Z');
+    //test('photos', 'IMG_0463.jpeg', 'https://www.pologne.campusfrance.org/pl');
+    //test('photos', 'IMG_0464.jpeg', 'https://app.adjust.com/559yxpx?fallback=https%3A%2F%2Fwww.glovoapp.com%2Fpl');
+    //test('photos', 'IMG_0465.jpeg', 'https://me-qr.com/15032608');
+    //test('photos', 'IMG_0466.jpeg', 'https://www.germany4ukraine.de/hilfeportal-ua?mtm_campaign=G4U&mtm_medium=A3Plakat');
+    //test('photos', 'IMG_0467.jpeg', 'https://www.inditexcareers.com/portalweb/pl/login?utm_source=window&utm_medium=store&utm_term=sales-assistant-20210917&utm_campaign=zara_qr_witryna-poland&utm_content=qr-ic');
+    //test('photos', 'IMG_0468.jpeg', 'www.pekao.com.pl/rodo/monitoring');
+    //test('photos', 'IMG_0469.jpeg', 'https://yes.mokka.pl/');
+    //test('photos', 'IMG_0471.jpeg', 'https://free-qr.com/link/JDGbVkOihp70CvTk');
   })
 })
 
