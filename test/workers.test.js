@@ -106,7 +106,13 @@ describe('Workers', function() {
       //test('photos', 'IMG_0467.jpeg', 'https://www.inditexcareers.com/portalweb/pl/login?utm_source=window&utm_medium=store&utm_term=sales-assistant-20210917&utm_campaign=zara_qr_witryna-poland&utm_content=qr-ic');
       test('photos', 'IMG_0468.jpeg', 'www.pekao.com.pl/rodo/monitoring');
       test('photos', 'IMG_0469.jpeg', 'https://yes.mokka.pl/');
+      //test('photos', 'IMG_0470.jpeg', 'https://apps.apple.com/pl/app/kappahl/id897900543?l=pl');
       test('photos', 'IMG_0471.jpeg', 'https://free-qr.com/link/JDGbVkOihp70CvTk');
+      //test('photos', 'IMG_0472.jpeg', 'https://play.google.com/store/apps/details?id=encomit.eu.galeriabronowice');
+      test('photos', 'IMG_0473.jpeg', 'http://onelink.to/dct_app');
+      test('photos', 'IMG_0474.jpeg', 'http://oneyraty.pl');
+      //test('photos', 'IMG_0475.jpeg', 'https://homla.com.pl/konkurs');
+      test('photos', 'IMG_0476.jpeg', 'https://qrco.de/REHOMEPL');
     })
   })
   describe('#quirc-worker', function() {
@@ -147,7 +153,13 @@ describe('Workers', function() {
       //test('photos', 'IMG_0467.jpeg', 'https://www.inditexcareers.com/portalweb/pl/login?utm_source=window&utm_medium=store&utm_term=sales-assistant-20210917&utm_campaign=zara_qr_witryna-poland&utm_content=qr-ic');
       test('photos', 'IMG_0468.jpeg', 'www.pekao.com.pl/rodo/monitoring');
       test('photos', 'IMG_0469.jpeg', 'https://yes.mokka.pl/');
+      test('photos', 'IMG_0470.jpeg', 'https://apps.apple.com/pl/app/kappahl/id897900543?l=pl');
       test('photos', 'IMG_0471.jpeg', 'https://free-qr.com/link/JDGbVkOihp70CvTk');
+      test('photos', 'IMG_0472.jpeg', 'https://play.google.com/store/apps/details?id=encomit.eu.galeriabronowice');
+      test('photos', 'IMG_0473.jpeg', 'http://onelink.to/dct_app');
+      test('photos', 'IMG_0474.jpeg', 'http://oneyraty.pl');
+      test('photos', 'IMG_0475.jpeg', 'https://homla.com.pl/konkurs');
+      test('photos', 'IMG_0476.jpeg', 'https://qrco.de/REHOMEPL');
     })
   })
 })

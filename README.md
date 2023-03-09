@@ -44,7 +44,7 @@ It's important to let the user know that your app is able to recognize a code. U
 ```js
 const cp = {
   stroke: '#00ff00',
-  fill: 'rgba(255, 255, 255, 0.25)',
+  fill: 'rgba(255, 0, 0, 0.25)',
   lineWidth: 3,
 };
 
@@ -59,9 +59,9 @@ function QRScreen() {
 }
 ```
 
-The code above draws a quadrilateral with green outline and white translucent interior:
+The code above draws a quadrilateral with green outline and red translucent interior:
 
-![cornerPoints](./images/screenshot-1.jpg)
+![cornerPoints](./doc/images/screenshot-1.jpg)
 
 Alternately, you can draw a "targetting box" over the area by specifying `boundingBox`:
 
@@ -85,7 +85,7 @@ function QRScreen() {
 }
 ```
 
-![boundingBox](./images/screenshot-1.jpg)
+![boundingBox](./doc/images/screenshot-2.jpg)
 
 If you app exits from the scanner screen as soon as it find a correct code, you might choose to 
 delay that action slightly so the user actually has a chance to see the visual indicator. In 
