@@ -1,0 +1,231 @@
+import { expect } from 'chai';
+import { createElement } from 'react';
+import { withTestRenderer } from './test-renderer.js';
+import { withFakeDOM } from './fake-dom.js';
+import { delay } from 'react-seq';
+
+import { 
+  BarcodeScanner,
+} from '../index.js';
+
+describe('Components', function() {
+  describe('#BarcodeScanner', function() {
+    it('should behave correctly when there is no DOM', async function() {
+      await withTestRenderer(async ({ render, toJSON }) => {
+        const el = createElement(BarcodeScanner);
+        await render(el);
+        const { props } = toJSON();
+        expect(props.className).to.equal('BarcodeScanner denied');
+      });
+    })
+    it('should have acquiring as class name initially', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render, toJSON }) => {
+          const el = createElement(BarcodeScanner);
+          const nodes = {};
+          const createNodeMock = ({ type, props }) => {
+            const node = { ...props };
+            nodes[type] = node;
+            if (type === 'video') {
+              node.play = () => {};
+            }
+            return node;
+          };
+          const promise = render(el, { createNodeMock });
+          const { props } = toJSON();
+          expect(props.className).to.equal('BarcodeScanner acquiring');  
+          await promise;
+          await delay(10);
+          const { props:later } = toJSON();
+          expect(later.className).to.equal('BarcodeScanner scanning');  
+        });
+      });
+    })
+    it('should call onData when a barcode is detected', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render, toJSON }) => {
+          let data;
+          const onData = d => data = d;
+          const el = createElement(BarcodeScanner, { onData, scanInterval: 10 });
+          const nodes = {};
+          const createNodeMock = ({ type, props }) => {
+            let node;
+            if (type === 'video') {
+              node = document.createElement('VIDEO');
+              document.elements.VIDEO = [ node ];
+            } else {
+              node = { ...props };
+            }
+            nodes[type] = node;
+            return node;
+          };
+          await render(el, { createNodeMock });
+          await delay(10);
+          const { props } = toJSON();
+          expect(props.className).to.equal('BarcodeScanner scanning');  
+          const { video } = nodes;
+          expect(video).to.not.be.undefined;
+          const barcode = {
+            format: 'qr_code',
+            rawValue: 'Hello world',
+            boundingRect: { 
+              left: 10,
+              top: 10,
+              right: 100,
+              bottom: 100,
+              width: 90,
+              height: 90,
+            },
+            cornerPoints: [
+              { x: 10, y: 10 },
+              { x: 100, y: 10 },
+              { x: 100, y: 100 },
+              { x: 10, y: 100 }
+            ],
+          }
+          video.barcodes = [ barcode ];
+          await delay(30);
+          expect(data).to.equal('Hello world');
+        });
+      });
+    })
+    it('should delay call to onData when delay is specified', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render, toJSON }) => {
+          let data;
+          const onData = d => data = d;
+          const el = createElement(BarcodeScanner, { 
+            onData, 
+            scanInterval: 10, 
+            delay: 50 
+          });
+          const nodes = {};
+          const createNodeMock = ({ type, props }) => {
+            let node;
+            if (type === 'video') {
+              node = document.createElement('VIDEO');
+              document.elements.VIDEO = [ node ];
+            } else {
+              node = { ...props };
+            }
+            nodes[type] = node;
+            return node;
+          };
+          await render(el, { createNodeMock });
+          await delay(10);
+          const { props } = toJSON();
+          expect(props.className).to.equal('BarcodeScanner scanning');  
+          const { video } = nodes;
+          expect(video).to.not.be.undefined;
+          const barcode = {
+            format: 'qr_code',
+            rawValue: 'Hello world',
+            boundingRect: { 
+              left: 10,
+              top: 10,
+              right: 100,
+              bottom: 100,
+              width: 90,
+              height: 90,
+            },
+            cornerPoints: [
+              { x: 10, y: 10 },
+              { x: 100, y: 10 },
+              { x: 100, y: 100 },
+              { x: 10, y: 100 }
+            ],
+          }
+          video.barcodes = [ barcode ];
+          await delay(30);
+          expect(data).to.be.undefined;
+          await delay(50);
+          expect(data).to.equal('Hello world');
+        });
+      });
+    })
+    it('should invoke onSnapshot when it is given', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render, toJSON }) => {
+          let data;
+          const onData = d => data = d;
+          let snapshot;
+          const onSnapshot = s => snapshot = s;
+          const el = createElement(BarcodeScanner, { 
+            onData,
+            onSnapshot, 
+            scanInterval: 10
+          });
+          const nodes = {};
+          const createNodeMock = ({ type, props }) => {
+            let node;
+            if (type === 'video') {
+              node = document.createElement('VIDEO');
+              document.elements.VIDEO = [ node ];
+            } else if (type === 'img') {
+              // don't create the img node so no attempt is made 
+              // to call URL.createObjectURL() on our fake blob
+              node = null;
+            } else {
+              node = { ...props };
+            }
+            nodes[type] = node;
+            return node;
+          };
+          await render(el, { createNodeMock });
+          await delay(10);
+          const { props } = toJSON();
+          expect(props.className).to.equal('BarcodeScanner scanning');  
+          const { video } = nodes;
+          expect(video).to.not.be.undefined;
+          const barcode = {
+            format: 'qr_code',
+            rawValue: 'Hello world',
+            boundingRect: { 
+              left: 10,
+              top: 10,
+              right: 100,
+              bottom: 100,
+              width: 90,
+              height: 90,
+            },
+            cornerPoints: [
+              { x: 10, y: 10 },
+              { x: 100, y: 10 },
+              { x: 100, y: 100 },
+              { x: 10, y: 100 }
+            ],
+          }
+          video.barcodes = [ barcode ];
+          await delay(30);
+          expect(data).to.equal('Hello world');
+          expect(snapshot).to.be.an('object');
+        });
+      });
+    })
+
+  })
+})
