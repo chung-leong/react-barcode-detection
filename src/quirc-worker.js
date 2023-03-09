@@ -1,7 +1,6 @@
 import Quirc from './wasm/quirc.js';
 
 let wasm;
-let prepared = false;
 
 const methods = {
   async detect({ data, width, height }) {
@@ -10,13 +9,11 @@ const methods = {
       const wasmBinary = await res.arrayBuffer();
       wasm = await Quirc({ wasmBinary });
     }
-    if (!prepared) {
-      const { _prepare } = wasm;
-      if (!_prepare(width, height)) {
-        throw new Error('Unable to allocate memory');
-      }  
-      prepared = true;
-    }
+    const { _prepare } = wasm;
+    /* c8 ignore next 2 */
+    if (!_prepare(width, height)) {
+      throw new Error('Unable to allocate memory');
+    }  
   
     // get pointer from WASM
     const { _begin, _end, _count, _get, _get_length, _get_type, _get_corners, HEAP8 } = wasm;
@@ -52,9 +49,10 @@ const methods = {
           }
           for (const encoding of encodings) {
             try {
-              return new TextDecoder(encoding).decode(bytes);
+              return new TextDecoder(encoding, { fatal: true }).decode(bytes);
             } catch (err) {
             }
+            /* c8 ignore next */
           }  
         })();
         // extract corners
@@ -79,19 +77,12 @@ const methods = {
 };
 
 function greyscale(buffer, data) {
-  let min = 255, max = 0;
   for (let i = 0, j = 0; i < buffer.length; i++, j += 4) {
     const r = data[j + 0];
     const g = data[j + 1];
     const b = data[j + 2];
     const p = (r * 59 + g * 150 + b * 29) >> 8;
     buffer[i] = p;
-    if (p > max) {
-      max = p;
-    }
-    if (p < min) {
-      min = p;
-    }
   }
 }
 

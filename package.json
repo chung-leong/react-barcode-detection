@@ -40,6 +40,7 @@
   "homepage": "https://github.com/chung-leong/react-barcode-detection#readme",
   "dependencies": {
     "jsqr": "^1.4.0",
+    "mocha-skip-if": "^1.0.3",
     "react-media-capture": "^0.0.8"
   },
   "peer-dependencies": {
