@@ -43,8 +43,8 @@ It's important to let the user know that your app is able to recognize a code. U
 
 ```js
 const cp = {
-  stroke: '#00FF00',
-  fill: 'rgba(255, 255, 255, 0.25),
+  stroke: '#00ff00',
+  fill: 'rgba(255, 255, 255, 0.25)',
   lineWidth: 3,
 };
 
@@ -59,7 +59,7 @@ function QRScreen() {
 }
 ```
 
-The code above draws a quadrilateral with green outline and white translucent interia:
+The code above draws a quadrilateral with green outline and white translucent interior:
 
 ![cornerPoints](./images/screenshot-1.jpg)
 
