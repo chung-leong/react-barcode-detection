@@ -29,7 +29,6 @@ class Window extends EventTarget {
     this.HTMLCanvasElement = HTMLCanvasElement;
     this.HTMLVideoElement = HTMLVideoElement;
     this.BarcodeDetector = BarcodeDetector;
-    this.WebAssembly = {};
     this.Worker = Worker;
 
     this.workers = [];

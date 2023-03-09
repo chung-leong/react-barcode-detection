@@ -1,0 +1,45 @@
+<html>
+  <style>
+    img {
+      display: block;
+      margin-bottom: 1em;      
+      max-width: 100%;
+    }
+
+    section {
+      display: block;
+      padding: 1em 1em 1em 1em;
+      margin-bottom: 1em;      
+      border: 2px dash black;
+      max-width: 100%;
+    }
+  </style>
+  <script>
+    async function scan(img) {
+      try {
+        const detector = new BarcodeDetector({ format: [ 'qr_code' ]});
+        const [ code ] = await detector.detect(img);
+        if (code) {
+          const section = document.createElement('SECTION');
+          section.textContent = code.rawValue;
+          img.replaceWith(section);
+        }
+      } catch (err) {        
+      }
+    }
+  </script>
+  <body>
+    <img src="IMG_0459.jpeg" onload="scan(this)">
+    <img src="IMG_0460.jpeg" onload="scan(this)">
+    <img src="IMG_0461.jpeg" onload="scan(this)">
+    <img src="IMG_0462.jpeg" onload="scan(this)">
+    <img src="IMG_0463.jpeg" onload="scan(this)">
+    <img src="IMG_0464.jpeg" onload="scan(this)">
+    <img src="IMG_0465.jpeg" onload="scan(this)">
+    <img src="IMG_0466.jpeg" onload="scan(this)">
+    <img src="IMG_0467.jpeg" onload="scan(this)">
+    <img src="IMG_0468.jpeg" onload="scan(this)">
+    <img src="IMG_0469.jpeg" onload="scan(this)">
+    <img src="IMG_0471.jpeg" onload="scan(this)">
+  </body>
+</html>

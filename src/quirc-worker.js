@@ -22,25 +22,18 @@ const methods = {
     const { _begin, _end, _count, _get, _get_length, _get_type, _get_corners, HEAP8 } = wasm;
     const bufPtr = _begin();
     const heap = HEAP8.buffer;
-    const pixelCount = width * height;
-    const buffer = new Uint8Array(heap, bufPtr, pixelCount);
+    const buffer = new Uint8Array(heap, bufPtr, width * height);
     // convert image data to greyscale 
-    for (let i = 0, j = 0; i < pixelCount; i++, j += 4) {
-      const r = data[j + 0];
-      const g = data[j + 1];
-      const b = data[j + 2];
-      const sum = r * 59 + g * 150 + b * 29;
-      buffer[i] = sum >> 8;
-    }
+    greyscale(buffer, data);
     // scan it
     _end();
     let count = _count();
     if (count === 0) {
-      // try with image inverted
-      _begin();
-      for (let i = 0; i < pixelCount; i++) {
-        buffer[i] = 255 - buffer[i];
-      }
+      // try with image inverted (quirc seems to modify the buffer so we need to redo the calculation)
+      const bufPtrInv = _begin();
+      const bufferInv = new Uint8Array(heap, bufPtrInv, width * height);
+      greyscale(bufferInv, data);
+      invert(bufferInv);
       _end();
       count = _count();
     }
@@ -85,7 +78,30 @@ const methods = {
   }     
 };
 
-onmessage = async function({ data: { name, args} }) {
+function greyscale(buffer, data) {
+  let min = 255, max = 0;
+  for (let i = 0, j = 0; i < buffer.length; i++, j += 4) {
+    const r = data[j + 0];
+    const g = data[j + 1];
+    const b = data[j + 2];
+    const p = (r * 59 + g * 150 + b * 29) >> 8;
+    buffer[i] = p;
+    if (p > max) {
+      max = p;
+    }
+    if (p < min) {
+      min = p;
+    }
+  }
+}
+
+function invert(buffer) {
+  for (let i = 0; i < buffer.length; i++) {
+    buffer[i] = 255 - buffer[i];
+  }
+}
+
+addEventListener('message', async ({ data: { name, args } }) => {
   try {
     const method = methods[name];
     if (!method) {
@@ -96,4 +112,4 @@ onmessage = async function({ data: { name, args} }) {
   } catch (err) {
     postMessage({ type: 'error', message: err.message });
   }
-}
+});

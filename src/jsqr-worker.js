@@ -19,7 +19,7 @@ const methods = {
   }
 };
 
-onmessage = async function({ data: { name, args} }) {
+addEventListener('message', async ({ data: { name, args } }) => {
   try {
     const method = methods[name];
     if (!method) {
@@ -30,4 +30,4 @@ onmessage = async function({ data: { name, args} }) {
   } catch (err) {
     postMessage({ type: 'error', message: err.message });
   }
-}
+});

@@ -187,29 +187,34 @@ describe('Hooks', function() {
         });
         delete window.BarcodeDetector;
         delete global.BarcodeDetector;
+        const WebAssembly = global.WebAssembly;
         delete window.WebAssembly;
         delete global.WebAssembly;
-        await withTestRenderer(async ({ render }) => {
-          let state;
-          function Test() {
-            state = useBarcodeDetection({ use: 'api,quirc,jsqr', scanInterval: 25 });
-            return null;                
-          }
-          const el = createElement(Test);
-          await render(el);
-          await delay(10);
-          const { status, liveVideo: { stream } } = state;
-          expect(status).to.equal('scanning');
-          const video = document.created.find(v => v.srcObject === stream);
-          expect(video).to.not.be.undefined;
-          video.barcodes = [ { rawValue: 'hello world', type: 'qr_code' } ];
-          const [ worker ] = window.workers;
-          expect(worker).to.not.be.undefined;
-          expect(worker.url.toString()).to.contain('jsqr-worker');
-          await delay(35);
-          const { barcodes } = state;
-          expect(barcodes).to.have.lengthOf(1);
-        });
+        try {
+          await withTestRenderer(async ({ render }) => {
+            let state;
+            function Test() {
+              state = useBarcodeDetection({ use: 'api,quirc,jsqr', scanInterval: 25 });
+              return null;                
+            }
+            const el = createElement(Test);
+            await render(el);
+            await delay(10);
+            const { status, liveVideo: { stream } } = state;
+            expect(status).to.equal('scanning');
+            const video = document.created.find(v => v.srcObject === stream);
+            expect(video).to.not.be.undefined;
+            video.barcodes = [ { rawValue: 'hello world', type: 'qr_code' } ];
+            const [ worker ] = window.workers;
+            expect(worker).to.not.be.undefined;
+            expect(worker.url.toString()).to.contain('jsqr-worker');
+            await delay(35);
+            const { barcodes } = state;
+            expect(barcodes).to.have.lengthOf(1);
+          }); 
+        } finally {
+          global.WebAssembly = WebAssembly;
+        }
       });
     })
     it('should use jsqr on when only jsqr is specified', async function() {
