@@ -102,3 +102,11 @@ body {
   opacity: 0.8;
   cursor: pointer;
 }
+
+@media (min-aspect-ratio: 8/5) {
+  .App select {
+    left: unset;
+    right: 1em;
+    font-size: 1.2em;
+  }
+}
