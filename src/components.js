@@ -24,7 +24,6 @@ export function BarcodeScanner(props) {
     liveVideo,
     capturedImage,
     barcodes,
-    lastError,
   } = useBarcodeDetection(options);
   let content, overlay
   if (liveVideo || capturedImage) {
@@ -44,7 +43,7 @@ export function BarcodeScanner(props) {
       content = createElement(StreamVideo, { srcObject, style });
     }
     if (cornerPoints || boundingBox) {
-      const { width, height } = liveVideo || capturedImage;
+      const { width, height } = capturedImage || liveVideo;
       overlay = createElement(BarcodeOverlay, { barcodes, width, height, boundingBox, cornerPoints, style });
     }
   } else {
@@ -75,9 +74,6 @@ export function BarcodeScanner(props) {
       }
     }
   }, [ barcodes, capturedImage, onData, onBarcodes, onSnapshot, delay ]);
-  if (lastError) {
-    return createElement('div', {}, lastError.message);
-  }
   return createElement('div', { className: classList.join(' '), style: { position: 'relative' } }, content, overlay);
 }
 

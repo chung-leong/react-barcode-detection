@@ -154,11 +154,15 @@ class HTMLCanvasElement extends EventTarget {
   constructor() {
     super();
     this.tagName = 'CANVAS';
+    this.context2D = null;
   }
 
   getContext(type) {
     if (type === '2d') {
-      return new CanvasRenderingContext2D();
+      if (!this.context2D) {
+        this.context2D = new CanvasRenderingContext2D(this);
+      }
+      return this.context2D;
     }
   }
 
@@ -182,20 +186,60 @@ function fetch(url) {
 }
 
 class CanvasRenderingContext2D {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ops = [];
+    this.fillStyle = 'default';
+    this.strokeStyle = 'default';
+    this.lineWidth = 'default';
+  }
+
   clearRect() {
     this.video = null;
   }
 
-  drawImage(video) {
-    this.video = video;
+  beginPath(...args) {
+    this.ops.push({ name: 'beginPath', args });
+  }
+
+  closePath(...args) {
+    this.ops.push({ name: 'closePath', args });
+  }
+
+  moveTo(...args) {
+    this.ops.push({ name: 'moveTo', args });
+  }
+
+  lineTo(...args) {
+    this.ops.push({ name: 'moveTo', args });
+  }
+
+  arcTo(...args) {
+    this.ops.push({ name: 'arcTo', args });
+  }
+
+  fill(...args) {
+    this.ops.push({ name: 'fill', args: [ this.fillStyle ]});
+  }
+
+  stroke(...args) {
+    this.ops.push({ name: 'stroke', args: [ this.strokeStyle, this.lineWidth ]});
+  }
+
+  drawImage(...args) {
+    this.ops.push({ name: 'drawImage', args });
   }
 
   getImageData() {
-    const { width, height, barcodes, error } = this.video;
+    const { width, height } = this.canvas;
     const data = new Uint8ClampedArray(0);
     const image = new ImageData(data, width, height);
-    image.barcodes = barcodes;
-    image.error = error;
+    const op = this.ops.find(op => op.name === 'drawImage');
+    if (op) {
+      const { barcodes, error } = op.args[0];
+      image.barcodes = barcodes;
+      image.error = error;
+    }
     return image;
   }
 }

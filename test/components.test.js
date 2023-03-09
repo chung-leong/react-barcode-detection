@@ -80,7 +80,7 @@ describe('Components', function() {
           const barcode = {
             format: 'qr_code',
             rawValue: 'Hello world',
-            boundingRect: { 
+            boundingBox: { 
               left: 10,
               top: 10,
               right: 100,
@@ -98,6 +98,60 @@ describe('Components', function() {
           video.barcodes = [ barcode ];
           await delay(30);
           expect(data).to.equal('Hello world');
+        });
+      });
+    })
+    it('should call onBarcodes when a barcode is detected', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render, toJSON }) => {
+          let barcodes;
+          const onBarcodes = b => barcodes = b;
+          const el = createElement(BarcodeScanner, { onBarcodes, scanInterval: 10 });
+          const nodes = {};
+          const createNodeMock = ({ type, props }) => {
+            let node;
+            if (type === 'video') {
+              node = document.createElement('VIDEO');
+              document.elements.VIDEO = [ node ];
+            } else {
+              node = { ...props };
+            }
+            nodes[type] = node;
+            return node;
+          };
+          await render(el, { createNodeMock });
+          await delay(10);
+          const { props } = toJSON();
+          expect(props.className).to.equal('BarcodeScanner scanning');  
+          const { video } = nodes;
+          expect(video).to.not.be.undefined;
+          const barcode = {
+            format: 'qr_code',
+            rawValue: 'Hello world',
+            boundingBox: { 
+              left: 10,
+              top: 10,
+              right: 100,
+              bottom: 100,
+              width: 90,
+              height: 90,
+            },
+            cornerPoints: [
+              { x: 10, y: 10 },
+              { x: 100, y: 10 },
+              { x: 100, y: 100 },
+              { x: 10, y: 100 }
+            ],
+          }
+          video.barcodes = [ barcode ];
+          await delay(50);
+          expect(barcodes).to.eql([ { format: 'qr_code', rawValue: 'Hello world' } ]);
         });
       });
     })
@@ -138,7 +192,7 @@ describe('Components', function() {
           const barcode = {
             format: 'qr_code',
             rawValue: 'Hello world',
-            boundingRect: { 
+            boundingBox: { 
               left: 10,
               top: 10,
               right: 100,
@@ -204,7 +258,7 @@ describe('Components', function() {
           const barcode = {
             format: 'qr_code',
             rawValue: 'Hello world',
-            boundingRect: { 
+            boundingBox: { 
               left: 10,
               top: 10,
               right: 100,
@@ -226,6 +280,156 @@ describe('Components', function() {
         });
       });
     })
+    it('should draw bounding box overlay over video when a barcode is detected', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render, toJSON }) => {
+          let data;
+          const onData = d => data = d;
+          const el = createElement(BarcodeScanner, { 
+            onData, 
+            boundingBox: {
+              fill: 'rgba(0, 255, 0, 0.4)',
+              stroke: '#fff',
+              radii: 10,
+              lineWidth: 4,
+              gap: 0.5,
+              margin: 0.1,           
+            },
+            scanInterval: 10,
+          });
+          const nodes = {};
+          const createNodeMock = ({ type, props }) => {
+            let node;
+            if (type === 'video') {
+              node = document.createElement('VIDEO');
+              document.elements.VIDEO = [ node ];
+            } else if (type === 'canvas') {
+              node = document.createElement('CANVAS');
+            } else {
+              node = { ...props };
+            }
+            nodes[type] = node;
+            return node;
+          };
+          await render(el, { createNodeMock });
+          await delay(10);
+          const { props } = toJSON();
+          expect(props.className).to.equal('BarcodeScanner scanning');  
+          const { video } = nodes;
+          expect(video).to.not.be.undefined;
+          const barcode = {
+            format: 'qr_code',
+            rawValue: 'Hello world',
+            boundingBox: { 
+              left: 10,
+              top: 10,
+              right: 100,
+              bottom: 100,
+              width: 90,
+              height: 90,
+            },
+            cornerPoints: [
+              { x: 10, y: 10 },
+              { x: 100, y: 10 },
+              { x: 100, y: 100 },
+              { x: 10, y: 100 }
+            ],
+          }
+          video.barcodes = [ barcode ];
+          await delay(30);
+          expect(data).to.equal('Hello world');
+          const canvas = document.created.find(el => el.tagName === 'CANVAS');
+          const { ops } = canvas.context2D;
+          const fill = ops.find(op => op.name === 'fill');
+          expect(fill).to.not.be.undefined;
+          expect(fill.args[0]).to.equal('rgba(0, 255, 0, 0.4)');
+          const stroke = ops.find(op => op.name === 'stroke');
+          expect(stroke).to.not.be.undefined;
+          expect(stroke.args[0]).to.equal('#fff');
+          expect(stroke.args[1]).to.equal(4);
+        });
+      });
+    })
+    it('should draw corner point overlay', async function() {
+      await withFakeDOM(async () => {
+        navigator.mediaDevices.addDevice({
+          deviceId: '007',
+          groupId: '007',
+          kind: 'videoinput',
+          label: 'Spy camera',
+        });
+        await withTestRenderer(async ({ render, toJSON }) => {
+          let data;
+          const onData = d => data = d;
+          const el = createElement(BarcodeScanner, { 
+            onData, 
+            cornerPoints: {
+              fill: 'rgba(255, 255, 255, 0.1)',
+              stroke: '#0f0',
+              lineWidth: 3,
+            },
+            scanInterval: 10,
+          });
+          const nodes = {};
+          const createNodeMock = ({ type, props }) => {
+            let node;
+            if (type === 'video') {
+              node = document.createElement('VIDEO');
+              document.elements.VIDEO = [ node ];
+            } else if (type === 'canvas') {
+              node = document.createElement('CANVAS');
+            } else {
+              node = { ...props };
+            }
+            nodes[type] = node;
+            return node;
+          };
+          await render(el, { createNodeMock });
+          await delay(10);
+          const { props } = toJSON();
+          expect(props.className).to.equal('BarcodeScanner scanning');  
+          const { video } = nodes;
+          expect(video).to.not.be.undefined;
+          const barcode = {
+            format: 'qr_code',
+            rawValue: 'Goodbye world',
+            boundingBox: { 
+              left: 10,
+              top: 10,
+              right: 100,
+              bottom: 100,
+              width: 90,
+              height: 90,
+            },
+            cornerPoints: [
+              { x: 10, y: 10 },
+              { x: 100, y: 10 },
+              { x: 100, y: 100 },
+              { x: 10, y: 100 }
+            ],
+          }
+          video.barcodes = [ barcode ];
+          await delay(30);
+          expect(data).to.equal('Goodbye world');
+          const canvas = document.created.find(el => el.tagName === 'CANVAS');
+          const { ops } = canvas.context2D;
+          const fill = ops.find(op => op.name === 'fill');
+          expect(fill).to.not.be.undefined;
+          expect(fill.args[0]).to.equal('rgba(255, 255, 255, 0.1)');
+          const stroke = ops.find(op => op.name === 'stroke');
+          expect(stroke).to.not.be.undefined;
+          expect(stroke.args[0]).to.equal('#0f0');
+          expect(stroke.args[1]).to.equal(3);
+        });
+      });
+    })
+
 
   })
 })
