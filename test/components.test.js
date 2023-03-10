@@ -7,6 +7,9 @@ import { delay } from 'react-seq';
 import { 
   BarcodeScanner,
 } from '../index.js';
+import {
+  extractRadii
+} from '../src/components.js';
 
 describe('Components', function() {
   describe('#BarcodeScanner', function() {
@@ -369,7 +372,21 @@ describe('Components', function() {
         });
       });
     })
-
-
+  })
+  describe('#extractRadii', function() {
+    it('should correctly handle the different possible inputs', function() {
+      const n = extractRadii(10);
+      expect(n).to.eql([ 10, 10, 10, 10 ]);
+      const a0 = extractRadii([]);
+      expect(a0).to.eql([ 0, 0, 0, 0 ]);
+      const a1 = extractRadii([ 10 ]);
+      expect(a1).to.eql([ 10, 10, 10, 10 ]);
+      const a2 = extractRadii([ 10, 5 ]);
+      expect(a2).to.eql([ 10, 5, 10, 5 ]);
+      const a3 = extractRadii([ 10, 5, 2 ]);
+      expect(a3).to.eql([ 10, 5, 2, 10 ]);
+      const a4 = extractRadii([ 10, 5, 2, 1 ]);
+      expect(a4).to.eql([ 10, 5, 2, 1 ]);
+    })
   })
 })

@@ -72,6 +72,7 @@ function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoints, st
     gap: bbGap = 0,
     margin: bbMargin = 0, 
   } = boundingBox ?? {};
+  const [ bbRadiusTL, bbRadiusTR, bbRadiusBR, bbRadiusBL ] = extractRadii(bbRadii);
   const { 
     fill: cpFill, 
     stroke: cpStroke,
@@ -99,22 +100,22 @@ function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoints, st
         const wLen = width * (1 - bbGap) / 2;
         ctx.beginPath();
         ctx.moveTo(left, top + vLen);
-        ctx.arcTo(left, top, left + wLen, top, bbRadii);
+        ctx.arcTo(left, top, left + wLen, top, bbRadiusTL);
         ctx.lineTo(left + wLen, top);
         if (bbGap) {
           ctx.moveTo(right - wLen, top);
         }
-        ctx.arcTo(right, top, right, top + vLen, bbRadii);
+        ctx.arcTo(right, top, right, top + vLen, bbRadiusTR);
         ctx.lineTo(right, top + vLen);
         if (bbGap) {
           ctx.moveTo(right, bottom - vLen);
         }
-        ctx.arcTo(right, bottom, right - wLen, bottom, bbRadii);
+        ctx.arcTo(right, bottom, right - wLen, bottom, bbRadiusBR);
         ctx.lineTo(right - wLen, bottom);
         if (bbGap) {
           ctx.moveTo(left + wLen, bottom);
         }
-        ctx.arcTo(left, bottom, left, bottom - vLen, bbRadii);
+        ctx.arcTo(left, bottom, left, bottom - vLen, bbRadiusBL);
         ctx.lineTo(left, bottom - vLen);
         if (bbFill) {
           ctx.fillStyle = bbFill;
@@ -148,8 +149,19 @@ function BarcodeOverlay({ barcodes, width, height, boundingBox, cornerPoints, st
       }
     }
   }, [ barcodes, width, height, 
-    bbFill, bbStroke, bbLineWidth, bbRadii, bbGap, bbMargin,
+    bbFill, bbStroke, bbLineWidth, bbGap, bbMargin, bbRadiusTL, bbRadiusTR, bbRadiusBR, bbRadiusBL,
     cpFill, cpStroke, cpLineWidth 
   ]);
   return createElement('canvas', { ref, width, height, style });
+}
+
+export function extractRadii(radii = 0) {
+  const { 0: r1, 1: r2, 2: r3, 3: r4, length } = Array.isArray(radii) ? radii : [ radii ];
+  switch(length) {
+    case 0: return [ 0, 0, 0, 0 ];
+    case 1: return [ r1, r1, r1, r1 ];
+    case 2: return [ r1, r2, r1, r2 ];
+    case 3: return [ r1, r2, r3, r1 ];
+    default: return [ r1, r2, r3, r4 ];
+  }
 }
