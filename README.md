@@ -3,8 +3,8 @@
 React-barcode-detection provides an easy-to-use component that lets your app capture 
 barcodes of various formats, including 2D varieties such as QR code. It utilizes the 
 new [Barcode Detection API](https://developer.mozilla.org/en-US/docs/Web/API/Barcode_Detection_API). 
-On platforms that lack support (everything except Android, currently), the library provides 
-fallbacks for scanning QR code.
+On [platforms that lack support](https://developer.mozilla.org/en-US/docs/Web/API/BarcodeDetector#browser_compatibility), 
+the library provides fallbacks for scanning QR code.
 
 Video capture functionality is provided by 
 [react-media-capture](https://github.com/chung-leong/react-media-capture).
@@ -158,7 +158,7 @@ function UTCScreen() {
 
 ## API Reference
 
-* [BarcodeScanner](./doc/BarcodeScanner.md)
-* [BlobImage](./doc/BlobImage.md)
-* [StreamVideo](./doc/StreamVideo.md)
-* [useBarcodeDetection](./doc/useBarcodeDetection.md)
+* [BarcodeScanner](./doc/BarcodeScanner.md#barcodescanner)
+* [BlobImage](./doc/BlobImage.md#blobimage)
+* [StreamVideo](./doc/StreamVideo.md#streamvideo)
+* [useBarcodeDetection](./doc/useBarcodeDetection.md#usebarcodedetectionoptions--)

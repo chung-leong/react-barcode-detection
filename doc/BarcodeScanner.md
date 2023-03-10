@@ -50,19 +50,20 @@ barcode is detected, an object with the following properties:
   * `width`: `<number>`
   * `height`: `<number>`
   * `clear`: `<Function>`
-* `active` - Whether scanning is active (default: `true`)
-* `accept` - Comma-delimited list of barcodes format to look for (default: `"qr_code"`)
-* `use` - Comma-delimited list of methods to try (default: `"api,jsqr"`)
-* `snapshot` - Take a snapshot of the video immediately upon barcode detection (default: 
-`true` when `onSnapshot` is set and `false` otherwise)
-* `scanInterval` - Time interval in millisecond between scans after an unsuccessful attempt 
-(default: `250`)
-* `scanIntervalPositive` - Time interval in millisecond between scans after a code is found 
-(default: `50`)
-* `clearInterval` - Duration of time in millisecond to wait when the hook fails to see a 
-barcode before it clears a previously found code (default: `250`)
-* `preferredDevice` - Which camera to use on devices with more than one (default: `"back"`)
-* `selectNewDevice` - Select newly plugged-in camera automatically (default: `true`)
+* `active` - `<booleab>` Whether the component is active (default: `true`)
+* `accept` - `<string>` Comma-delimited list of barcodes format to look for (default: `"qr_code"`)
+* `use` - `<string>` Comma-delimited list of methods to try (default: `"api,jsqr"`)
+* `snapshot` - `<booleab>` Take a snapshot of the video immediately upon code detection 
+(default: `false`)
+* `scanInterval` - `<number>` Time interval in millisecond between scans after an unsuccessful
+attempt (default: `250`)
+* `scanIntervalPositive` - `<number>` Time interval in millisecond between scans after a code is
+found (default: `50`)
+* `clearInterval` - `<number>` Duration of time in millisecond to wait when the hook fails to see
+a barcode before it clears a previously found code (default: `250`)
+* `preferredDevice` - `<string>` Which camera to use on devices with more than one 
+(default: `"back"`)
+* `selectNewDevice` - `<boolean>` Select newly plugged-in camera automatically (default: `true`)
 
 ## Notes
 

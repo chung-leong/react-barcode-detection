@@ -38,24 +38,26 @@ function Widget() {
 ## Parameters
 
 * `options` - `<Object>`
-* `return` `<Object>`
+* `return` `{ ...state, ...methods }`
 
 ## Options
 
-* `active` - Whether the hook is active (default: `true`)
-* `accept` - Comma-delimited list of barcodes format to look for (default: `"qr_code"`)
-* `use` - Comma-delimited list of methods to try (default: `"api,jsqr"`)
-* `snapshot` - Take a snapshot of the video immediately upon code detection (default: `false`)
-* `scanInterval` - Time interval in millisecond between scans after an unsuccessful attempt 
-(default: `250`)
-* `scanIntervalPositive` - Time interval in millisecond between scans after a code is found 
-(default: `50`)
-* `clearInterval` - Duration of time in millisecond to wait when the hook fails to see a 
-barcode before it clears a previously found code (default: `250`)
-* `preferredDevice` - Which camera to use on devices with more than one (default: `"back"`)
-* `selectNewDevice` - Select newly plugged-in camera automatically (default: `true`)
+* `active` - `<booleab>` Whether the hook is active (default: `true`)
+* `accept` - `<string>` Comma-delimited list of barcodes format to look for (default: `"qr_code"`)
+* `use` - `<string>` Comma-delimited list of methods to try (default: `"api,jsqr"`)
+* `snapshot` - `<booleab>` Take a snapshot of the video immediately upon code detection 
+(default: `false`)
+* `scanInterval` - `<number>` Time interval in millisecond between scans after an unsuccessful
+attempt (default: `250`)
+* `scanIntervalPositive` - `<number>` Time interval in millisecond between scans after a code is
+found (default: `50`)
+* `clearInterval` - `<number>` Duration of time in millisecond to wait when the hook fails to see
+a barcode before it clears a previously found code (default: `250`)
+* `preferredDevice` - `<string>` Which camera to use on devices with more than one 
+(default: `"back"`)
+* `selectNewDevice` - `<boolean>` Select newly plugged-in camera automatically (default: `true`)
 
-## Return value properties
+## State variables
 
 * `status` - `<string>` The current status, which can be one of the following:
   * "pending" - `active` is false and the hook is not doing anything.
@@ -82,8 +84,11 @@ barcode before it clears a previously found code (default: `250`)
   * `id`: `<string>`
   * `label`: `<string>`
 * `selectedDeviceId` - `<string>` ID of the currently selected camera
-* `selectDevice` - `<Function>` Function for selecting a different device
 * `lastError` - `<Error>` The last error encountered by the hook
+
+## Methods
+
+* `selectDevice(deviceId)` - Selecting a different device
 
 ## Notes
 
