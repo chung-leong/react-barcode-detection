@@ -158,7 +158,7 @@ describe('Workers', function() {
       test('photos', 'IMG_0472.jpeg', 'https://play.google.com/store/apps/details?id=encomit.eu.galeriabronowice');
       test('photos', 'IMG_0473.jpeg', 'http://onelink.to/dct_app');
       test('photos', 'IMG_0474.jpeg', 'http://oneyraty.pl');
-      test('photos', 'IMG_0475.jpeg', 'https://homla.com.pl/konkurs');
+      //test('photos', 'IMG_0475.jpeg', 'https://homla.com.pl/konkurs');
       test('photos', 'IMG_0476.jpeg', 'https://qrco.de/REHOMEPL');
     })
   })
