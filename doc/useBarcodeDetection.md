@@ -43,8 +43,6 @@ function Widget() {
 ## Options
 
 * `active` - Whether the hook is active (default: `true`)
-* `preferredDevice` - Which camera to use on devices with more than one (default: `"back"`)
-* `selectNewDevice` - Select newly plugged-in camera automatically (default: `true`)
 * `accept` - Comma-delimited list of barcodes format to look for (default: `"qr_code"`)
 * `use` - Comma-delimited list of methods to try (default: `"api,jsqr"`)
 * `snapshot` - Take a snapshot of the video immediately upon code detection (default: `false`)
@@ -52,7 +50,10 @@ function Widget() {
 (default: `250`)
 * `scanIntervalPositive` - Time interval in millisecond between scans after a code is found 
 (default: `50`)
-* `clearInterval` - Duration of time in millisecond to wait when the hook fails to see a barcode before it clears a previously found code (default: 250)
+* `clearInterval` - Duration of time in millisecond to wait when the hook fails to see a 
+barcode before it clears a previously found code (default: `250`)
+* `preferredDevice` - Which camera to use on devices with more than one (default: `"back"`)
+* `selectNewDevice` - Select newly plugged-in camera automatically (default: `true`)
 
 ## Return value properties
 
