@@ -87,13 +87,13 @@ function QRScreen() {
 
 ![boundingBox](./doc/images/screenshot-2.jpg)
 
-If you app exits from the scanner screen as soon as it find a correct code, you might choose to 
-delay that action slightly so the user actually has a chance to see the visual indicator. In 
-that case you would want to set `clearInterval` to a higher value (the default is 250ms) so the 
+If you app exits from the scanner screen as soon as it finds a correct code, you might choose to 
+delay the exit slightly so the user actually has a chance to see the visual indicator. In 
+that case you would want to make `clearInterval` longer (the default is 250ms) so the 
 code does not disappear (due to the user's shaky hand, for instance) during the delay.
 
-Another way to let the user know that a code has been captured is to switch from the live video to a frozen frame. You app will receive JPEG snap upon barcode detection when you provide a `onSnapshot`
-handler. 
+Another way to let the user know that a code has been captured is to switch from the live video to a frozen frame. You app will receive a JPEG snapshot upon barcode detection when you provide a 
+`onSnapshot` handler. 
 
 Check out the [live demo](https://chung-leong.github.io/react-barcode-detection/) to see the 
 component in action. You can see the source code [here](./demo/src/App.js).
@@ -130,12 +130,13 @@ A list of available formats can be found at
 
 As of writing, the 
 [Barcode Detection API](https://developer.mozilla.org/en-US/docs/Web/API/Barcode_Detection_API#browser_compatibility) is not available on Windows or iOS. 
-This library provides JavaScript fallback for scanning QR codes using 
+This library provides fallback for scanning QR codes using 
 [jsQR](https://github.com/cozmo/jsQR). 
 
 A second fallback based on [quirc](https://github.com/dlbeer/quirc) is available. 
-It's more efficient since it uses WebAssembly, but not as tolerant of poor image
-quality as jsQR. It might be appropriate for less powerful mobile devices. 
+It's more efficient since it uses WebAssembly, but is not as tolerant of poor 
+lighting conditions as jsQR. It might be appropriate for less powerful mobile 
+devices. 
 
 To enable the use of quirc, set the `use` prop to "api,quirc,jsqr":
 
