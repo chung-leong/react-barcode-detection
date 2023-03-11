@@ -7,7 +7,7 @@ On [platforms that lack support](https://developer.mozilla.org/en-US/docs/Web/AP
 the library provides fallbacks for scanning QR code.
 
 Video capture functionality is provided by 
-[react-media-capture](https://github.com/chung-leong/react-media-capture).
+[react-media-capture](https://github.com/chung-leong/react-media-capture#readme).
 
 # Insallation
 
@@ -16,9 +16,9 @@ npm install --save-dev react-barcode-detection
 ```
 
 If you're using npm 14.x, you'll need to manually install the peer dependency 
-[react-seq](https://github.com/chung-leong/react-media-capture).
+[react-seq](https://github.com/chung-leong/react-media-capture#readme).
 
-# Basic usable
+# Basic usage
 
 ```js
 import { useState } from 'react;
@@ -158,7 +158,7 @@ function UTCScreen() {
 
 ## API Reference
 
-* [BarcodeScanner](./doc/BarcodeScanner.md#barcodescanner)
-* [BlobImage](./doc/BlobImage.md#blobimage)
-* [StreamVideo](./doc/StreamVideo.md#streamvideo)
-* [useBarcodeDetection](./doc/useBarcodeDetection.md#usebarcodedetectionoptions--)
+* [BarcodeScanner](./doc/BarcodeScanner.md#readme)
+* [BlobImage](./doc/BlobImage.md#readme)
+* [StreamVideo](./doc/StreamVideo.md#readme)
+* [useBarcodeDetection](./doc/useBarcodeDetection.md#readme)
