@@ -17,9 +17,7 @@ body {
 .App select {
   position: absolute;
   top: 1em;
-  left: 0;
-  right: 0;
-  margin: auto;
+  right: 1em;
   width: fit-content;
   appearance: none;
   border-color: #fff;
@@ -30,6 +28,35 @@ body {
   border-radius: 5px;
   padding: 5px 10px 5px 10px;
   z-index: 1;
+}
+
+.App nav {
+  position: absolute;
+  top: 1.6em;
+  left: 1em;
+  z-index: 2;
+}
+
+.App nav span {
+  display: inline-block;
+  margin-left: 0.5em;
+  font-weight: bold;
+  font-size: 1.5em;
+  padding: 0.1em 0.1em 0.1em 0.1em;
+  width: 1.5em;
+  border-radius: 1em;
+  text-align: center;
+  border: 1px solid #fff;
+  cursor: pointer;
+}
+
+.App nav span.on {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.App nav span.off {
+  color: rgba(128, 128, 128, 0.5);
+  border-color: rgba(128, 128, 128, 0.25);
 }
 
 .BarcodeScanner {
@@ -103,10 +130,12 @@ body {
   cursor: pointer;
 }
 
-@media (min-aspect-ratio: 8/5) {
+@media (max-width: 400px) {
   .App select {
-    left: unset;
-    right: 1em;
+    font-size: 1.2em;
+  }
+
+  .App nav span {
     font-size: 1.2em;
   }
 

@@ -15,24 +15,42 @@ const cp = {
 
 export default function App() {
   const [ type, setType ] = useState('ContinuousScan');
+  const [ api, setAPI ] = useState(true);
+  const [ quirc, setQuirc ] = useState(false);
+  const [ jsqr, setJSQR ] = useState(true);
   const Component = ({ ContinuousScan, SnapAndHold, FindAndStop })[type];
+  const methods = [];
+  if (api) {
+    methods.push('api');
+  }
+  if (quirc) {
+    methods.push('quirc');
+  }
+  if (jsqr) {
+    methods.push('jsqr');
+  }
   return (
     <div className="App">
+      <nav>
+        <span className={api ? 'on' : 'off'} onClick={() => setAPI(v => !v)}>A</span>
+        <span className={quirc ? 'on' : 'off'} onClick={() => setQuirc(v => !v)}>Q</span>
+        <span className={jsqr ? 'on' : 'off'} onClick={() => setJSQR(v => !v)}>J</span>
+      </nav>
       <select onChange={(e) => setType(e.target.value)}>
         <option value="ContinuousScan">Continuous scan</option>
         <option value="SnapAndHold">Snap and hold</option>
         <option value="FindAndStop">Find and stop</option>
       </select>
-      <Component />
+      <Component use={methods.join(',')}/>
     </div>
   );
 }
 
-function ContinuousScan() {
+function ContinuousScan({ use }) {
   const [ data, setData ] = useState();
   return (
     <div>
-      <BarcodeScanner boundingBox={bb} cornerPoints={cp} onData={setData}>
+      <BarcodeScanner boundingBox={bb} cornerPoints={cp} use={use} onData={setData}>
         <NoCamera />
       </BarcodeScanner>
       <BarcodeData type="overlay" data={data} />
@@ -40,12 +58,12 @@ function ContinuousScan() {
   );
 }
 
-function SnapAndHold() {
+function SnapAndHold({ use }) {
   const [ data, setData ] = useState();
   const [ snapshot, setSnapshot ] = useState();
   return (
     <div>
-      <BarcodeScanner boundingBox={bb} cornerPoints={cp} onData={setData} onSnapshot={setSnapshot}>
+      <BarcodeScanner boundingBox={bb} cornerPoints={cp} use={use} onData={setData} onSnapshot={setSnapshot}>
         <NoCamera />
       </BarcodeScanner>
       <BarcodeData type="overlay" data={data} />
@@ -56,7 +74,7 @@ function SnapAndHold() {
   );
 }
 
-function FindAndStop() {
+function FindAndStop({ use }) {
   const [ data, setData ] = useState();
   const setDataLater = useCallback((data) => {
     if (data) {
@@ -66,7 +84,7 @@ function FindAndStop() {
   return (
     <div>
       {!data &&
-        <BarcodeScanner boundingBox={bb} cornerPoints={cp} clearInterval={500} onData={setDataLater}>
+        <BarcodeScanner boundingBox={bb} cornerPoints={cp} use={use} clearInterval={500} onData={setDataLater}>
           <NoCamera />
         </BarcodeScanner>
       }
