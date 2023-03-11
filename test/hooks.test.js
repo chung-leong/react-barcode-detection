@@ -144,7 +144,7 @@ describe('Hooks', function() {
         });
       });
     })
-    it('should use jsqr on when there is no BarcodeDetector', async function() {
+    it('should use jsqr when there is no BarcodeDetector', async function() {
       await withFakeDOM(async () => {
         navigator.mediaDevices.addDevice({
           deviceId: '007',
@@ -171,7 +171,7 @@ describe('Hooks', function() {
           const [ worker ] = window.workers;
           expect(worker).to.not.be.undefined;
           expect(worker.url.toString()).to.contain('jsqr-worker');
-          await delay(35);
+          await delay(50);
           const { barcodes } = state;
           expect(barcodes).to.have.lengthOf(1);
         });
@@ -208,7 +208,7 @@ describe('Hooks', function() {
             const [ worker ] = window.workers;
             expect(worker).to.not.be.undefined;
             expect(worker.url.toString()).to.contain('jsqr-worker');
-            await delay(35);
+            await delay(50);
             const { barcodes } = state;
             expect(barcodes).to.have.lengthOf(1);
           }); 
@@ -242,7 +242,7 @@ describe('Hooks', function() {
           const [ worker ] = window.workers;
           expect(worker).to.not.be.undefined;
           expect(worker.url.toString()).to.contain('jsqr-worker');
-          await delay(35);
+          await delay(50);
           const { barcodes } = state;
           expect(barcodes).to.have.lengthOf(1);
         });
@@ -273,7 +273,7 @@ describe('Hooks', function() {
           const [ worker ] = window.workers;
           expect(worker).to.not.be.undefined;
           expect(worker.url.toString()).to.contain('quirc-worker');
-          await delay(35);
+          await delay(50);
           const { barcodes } = state;
           expect(barcodes).to.have.lengthOf(1);
         });
@@ -304,7 +304,7 @@ describe('Hooks', function() {
           const [ worker ] = window.workers;
           expect(worker).to.not.be.undefined;
           expect(worker.url.toString()).to.contain('quirc-worker');
-          await delay(35);
+          await delay(50);
           const { barcodes, lastError } = state;
           expect(lastError).to.be.an('error');
           expect(lastError.message).to.equal('Doh!');
