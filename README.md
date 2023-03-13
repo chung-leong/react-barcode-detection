@@ -21,7 +21,7 @@ If you're using npm 14.x, you'll need to manually install the peer dependency
 # Basic usage
 
 ```js
-import { useState } from 'react;
+import { useState } from 'react';
 import { BarcodeScanner } from 'react-barcode-detection';
 
 function QRScreen() {
