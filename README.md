@@ -156,6 +156,17 @@ function UTCScreen() {
 }
 ```
 
+## Live demo
+
+The live demo is designed to run on either a desktop or a mobile environment. It shows you 
+the different ways your app can respond to the detection of a QR code.
+
+![live demo](./doc/images/screenshot-3.jpg)
+
+Click on one of the letters on the left to toggle the different methods. "A" is the
+Barcode API (will be used if available), "Q" is the WebAssembly-based quirc. "J" is 
+jsQR. 
+
 ## API Reference
 
 * [BarcodeScanner](./doc/BarcodeScanner.md#readme)
