@@ -1,6 +1,6 @@
 {
   "name": "react-barcode-detection",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Easy-to-use React component for detecting barcodes",
   "main": "index.js",
   "type": "module",
@@ -40,7 +40,7 @@
   "homepage": "https://github.com/chung-leong/react-barcode-detection#readme",
   "dependencies": {
     "jsqr": "^1.4.0",
-    "react-media-capture": "^0.0.10"
+    "react-media-capture": "^0.0.12"
   },
   "peer-dependencies": {
     "react-seq": "^0.9.0"
